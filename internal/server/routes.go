@@ -16,6 +16,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	// Purchase
 	mux.HandleFunc("GET /v1/merchants/nearby/{coordinate}", s.GetNearbyMerchants)
-
+	mux.HandleFunc("POST /v1/users/estimate", s.EstimateOrderPrice)
 	return logger.LoggingMiddleware(s.contentMiddleware(s.authMiddleware(mux)))
 }

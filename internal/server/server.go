@@ -22,6 +22,9 @@ type Service interface {
 	IsUserExist(ctx context.Context, userID int64) (bool, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
+
+	// Purchase
+	EstimateOrderPrice(ctx context.Context, req model.OrderEstimation) (model.EstimationPrice, error)
 }
 
 type Server struct {

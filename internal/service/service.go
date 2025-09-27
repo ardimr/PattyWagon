@@ -28,7 +28,8 @@ type Repository interface {
 	GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error)
 	FileExists(ctx context.Context, fileID string) (bool, error)
 
-	// Product Repository
+	// Merchant Repository
+	GetMerchantByID(ctx context.Context, id int64) (model.Merchant, error)
 }
 
 type Storage interface {
