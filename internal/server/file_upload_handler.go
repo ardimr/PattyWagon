@@ -26,7 +26,6 @@ func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
-		log.Printf("invalid request: %v", err)
 		sendErrorResponse(w, http.StatusBadRequest, "invalid request")
 		return
 	}
@@ -36,13 +35,10 @@ func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case constants.ErrMaximumFileSize:
-			log.Println("invalid file size")
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		case constants.ErrInvalidFileType:
-			log.Println("invalid file type")
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		default:
-			log.Printf("internal server error: %v", err)
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		}
 		return

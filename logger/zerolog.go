@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -10,11 +11,10 @@ import (
 )
 
 func Init() {
-	if os.Getenv("ENV") == "production" {
+	if os.Getenv("ENV") == "PRODUCTION" {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 }
@@ -37,7 +37,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			logEvent = log.Error()
 		}
 
-		logEvent.Str("method", r.Method).
+		logEvent = logEvent.Str("method", r.Method).
 			Str("path", r.URL.Path).
 			Int("status", wrapped.statusCode)
 
@@ -45,10 +45,16 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			var errResp ErrorResponse
 
 			if err := json.Unmarshal(wrapped.body, &errResp); err != nil {
+				logEvent = logEvent.Str("error", string(wrapped.body))
+			} else {
 				logEvent = logEvent.Str("error", errResp.Error)
 			}
 		}
 
 		logEvent.Msg("Request completed")
 	})
+}
+
+func GetLogger(ctx context.Context) *zerolog.Logger {
+	return &log.Logger
 }
