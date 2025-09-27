@@ -5,11 +5,11 @@ import (
 	"PattyWagon/internal/model"
 	"PattyWagon/internal/storage"
 	"PattyWagon/internal/utils"
+	"PattyWagon/logger"
 	"PattyWagon/observability"
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -19,6 +19,8 @@ import (
 func (s *Service) UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error) {
 	ctx, span := observability.Tracer.Start(ctx, "service.file_upload")
 	defer span.End()
+
+	log := logger.GetLoggerFromContext(ctx)
 
 	var result model.File
 

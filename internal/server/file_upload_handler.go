@@ -4,7 +4,6 @@ import (
 	"PattyWagon/internal/constants"
 	"PattyWagon/observability"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -19,7 +18,6 @@ func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseMultipartForm(150 << 10); err != nil { // 150 KB
-		log.Printf("error parsing multipart form: %v", err)
 		sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("error parsing multipart form: %v", err))
 		return
 	}

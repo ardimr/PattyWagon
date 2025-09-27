@@ -55,6 +55,6 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func GetLogger(ctx context.Context) *zerolog.Logger {
+func GetLoggerFromContext(ctx context.Context) *zerolog.Logger {
 	return &log.Logger
 }
