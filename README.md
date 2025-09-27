@@ -1,5 +1,5 @@
 # Project PattyWagon
-![alt text](https://i.redd.it/n5vchraxh5j91.jpg)
+![patty wagon](https://i.redd.it/n5vchraxh5j91.jpg) <br/>
 TeamSolid Project 3 Implementation for ProjectSprint. Check the requirements here: [Project 3 Requirements](https://app.capacities.io/home/9253bb68-e94b-4d05-936b-389bdedc5a0d)
 
 ## Getting Started
