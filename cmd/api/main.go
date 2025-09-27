@@ -1,12 +1,12 @@
 package main
 
 import (
-	"WeenieHut/internal/database"
-	imagecompressor "WeenieHut/internal/image_compressor"
-	"WeenieHut/internal/repository"
-	"WeenieHut/internal/service"
-	"WeenieHut/internal/storage"
-	"WeenieHut/observability"
+	"PattyWagon/internal/database"
+	imagecompressor "PattyWagon/internal/image_compressor"
+	"PattyWagon/internal/repository"
+	"PattyWagon/internal/service"
+	"PattyWagon/internal/storage"
+	"PattyWagon/observability"
 	"context"
 	"fmt"
 	"log"
@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"WeenieHut/internal/server"
+	"PattyWagon/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {

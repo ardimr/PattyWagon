@@ -1,8 +1,8 @@
 package server
 
 import (
-	"WeenieHut/internal/constants"
-	"WeenieHut/observability"
+	"PattyWagon/internal/constants"
+	"PattyWagon/observability"
 	"fmt"
 	"log"
 	"net/http"

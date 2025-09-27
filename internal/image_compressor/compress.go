@@ -1,7 +1,7 @@
 package imagecompressor
 
 import (
-	"WeenieHut/observability"
+	"PattyWagon/observability"
 	"bytes"
 	"context"
 	"fmt"

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"WeenieHut/internal/constants"
-	"WeenieHut/internal/utils"
+	"PattyWagon/internal/constants"
+	"PattyWagon/internal/utils"
 	"context"
 	"net/http"
 	"strings"

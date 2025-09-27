@@ -1,11 +1,11 @@
 package server
 
 import (
-	"WeenieHut/internal/database"
-	imagecompressor "WeenieHut/internal/image_compressor"
-	"WeenieHut/internal/repository"
-	"WeenieHut/internal/service"
-	"WeenieHut/internal/storage"
+	"PattyWagon/internal/database"
+	imagecompressor "PattyWagon/internal/image_compressor"
+	"PattyWagon/internal/repository"
+	"PattyWagon/internal/service"
+	"PattyWagon/internal/storage"
 	"bytes"
 	"encoding/json"
 	"io"

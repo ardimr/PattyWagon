@@ -1,7 +1,7 @@
 package server
 
 import (
-	"WeenieHut/internal/utils"
+	"PattyWagon/internal/utils"
 	"log"
 	"net/http"
 )

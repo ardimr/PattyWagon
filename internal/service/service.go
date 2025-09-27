@@ -1,7 +1,7 @@
 package service
 
 import (
-	"WeenieHut/internal/model"
+	"PattyWagon/internal/model"
 	"context"
 )
 

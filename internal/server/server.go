@@ -1,7 +1,7 @@
 package server
 
 import (
-	"WeenieHut/internal/model"
+	"PattyWagon/internal/model"
 	"context"
 	"fmt"
 	"io"

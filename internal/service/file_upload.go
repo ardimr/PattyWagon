@@ -1,11 +1,11 @@
 package service
 
 import (
-	"WeenieHut/internal/constants"
-	"WeenieHut/internal/model"
-	"WeenieHut/internal/storage"
-	"WeenieHut/internal/utils"
-	"WeenieHut/observability"
+	"PattyWagon/internal/constants"
+	"PattyWagon/internal/model"
+	"PattyWagon/internal/storage"
+	"PattyWagon/internal/utils"
+	"PattyWagon/observability"
 	"context"
 	"fmt"
 	"io"

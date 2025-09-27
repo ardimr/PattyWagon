@@ -1,8 +1,8 @@
 package server
 
 import (
-	"WeenieHut/internal/constants"
-	"WeenieHut/internal/model"
+	"PattyWagon/internal/constants"
+	"PattyWagon/internal/model"
 	"database/sql"
 	"encoding/json"
 	"errors"

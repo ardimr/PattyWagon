@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"WeenieHut/internal/model"
-	"WeenieHut/observability"
+	"PattyWagon/internal/model"
+	"PattyWagon/observability"
 	"context"
 	"database/sql"
 	"errors"

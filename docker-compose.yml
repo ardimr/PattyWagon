@@ -1,6 +1,6 @@
 services:
   patty-wagon-api:
-    image: weeniehut-patty-wagon-api:latest
+    image: PattyWagon-patty-wagon-api:latest
     profiles:
       - deploy
     build:

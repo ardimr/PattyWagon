@@ -1,9 +1,9 @@
 package service
 
 import (
-	"WeenieHut/internal/constants"
-	"WeenieHut/internal/model"
-	"WeenieHut/internal/utils"
+	"PattyWagon/internal/constants"
+	"PattyWagon/internal/model"
+	"PattyWagon/internal/utils"
 	"context"
 	"strings"
 )

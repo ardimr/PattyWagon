@@ -1,7 +1,7 @@
 package imagecompressor
 
 import (
-	"WeenieHut/internal/utils"
+	"PattyWagon/internal/utils"
 	"context"
 	"fmt"
 	"testing"

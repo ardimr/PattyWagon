@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"WeenieHut/observability"
+	"PattyWagon/observability"
 	"context"
 	"fmt"
 	"log"

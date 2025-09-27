@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"WeenieHut/internal/constants"
+	"PattyWagon/internal/constants"
 	"fmt"
 	"os"
 	"path/filepath"
