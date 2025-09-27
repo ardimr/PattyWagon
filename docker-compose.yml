@@ -1,0 +1,152 @@
+services:
+  patty-wagon-api:
+    image: weeniehut-patty-wagon-api:latest
+    profiles:
+      - deploy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: patty-wagon-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - psql_bp
+      - minio
+    environment:
+      - PORT=8080
+      - APP_ENV=local
+      - DB_HOST=psql_bp
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=patty-wagon-dev
+      - DB_SCHEMA=public
+      - S3_ENDPOINT=minio:9000
+      - S3_ACCESS_KEY_ID=team-solid
+      - S3_SECRET_ACCESS_KEY=@team-solid
+      - S3_BUCKET=images
+      - OTLP_ENDPOINT=jaeger:4317
+  
+  psql_bp:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: patty-wagon-dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - psql_volume_bp:/var/lib/postgresql/sprint/data
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: team-solid
+      MINIO_ROOT_PASSWORD: "@team-solid"
+      MINIO_DEFAULT_BUCKETS: images
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 1m
+      retries: 5
+    volumes:
+      - minio_volume:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+  createBucket:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set solid http://minio:9000 team-solid @team-solid &&
+      /usr/bin/mc mb solid/images
+      "
+  setPublicBucket:
+    image: minio/mc
+    depends_on:
+      createBucket:
+        condition: service_completed_successfully
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set solid http://minio:9000 team-solid @team-solid &&
+      /usr/bin/mc anonymous set public solid/images
+      "
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+    expose:
+      - "16686"
+    ports:
+      - 16686:16686
+      - 4317:4317
+      - 4318:4318
+    command: 
+      - "--memory.max-traces"
+      - "1000"
+      - "--collector.otlp.grpc.host-port"
+      - ":4317"
+      - "--collector.otlp.http.host-port"
+      - ":4318"
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: 
+      - monitoring
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles:
+      - monitoring
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/provisioning/dashboards/postgres-dashboard.json:/etc/grafana/provisioning/dashboards/postgres-dashboard.json
+    depends_on:
+      - prometheus
+  
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    profiles:
+      - monitoring
+    container_name: postgres-exporter
+    ports:
+      - "9187:9187"
+    environment:
+      # Replace with your K8s PostgreSQL connection details
+      - DATA_SOURCE_NAME=postgresql://postgres:postgres@psql_bp:5432/patty-wagon-dev?sslmode=disable
+    depends_on:
+      - prometheus
+
+volumes:
+  psql_volume_bp:
+  minio_volume:
+  prometheus_data:
+  grafana_data:
