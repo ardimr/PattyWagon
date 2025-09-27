@@ -14,5 +14,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /v1/login/email", s.emailLoginHandler)
 	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
 
+	// Purchase
+	mux.HandleFunc("GET /v1/merchants/nearby/{coordinate}", s.GetNearbyMerchants)
+
 	return logger.LoggingMiddleware(s.contentMiddleware(s.authMiddleware(mux)))
 }
