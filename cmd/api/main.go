@@ -6,6 +6,7 @@ import (
 	"PattyWagon/internal/repository"
 	"PattyWagon/internal/service"
 	"PattyWagon/internal/storage"
+	"PattyWagon/logger"
 	"PattyWagon/observability"
 	"context"
 	"fmt"
@@ -44,6 +45,9 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
+	// Init logger
+	logger.Init()
+
 	db := database.New()
 	defer db.Close()
 	repo := repository.New(db)

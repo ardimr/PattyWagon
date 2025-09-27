@@ -1,6 +1,7 @@
 package server
 
 import (
+	"PattyWagon/logger"
 	"net/http"
 )
 
@@ -13,5 +14,5 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /v1/login/email", s.emailLoginHandler)
 	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
 
-	return s.contentMiddleware(s.authMiddleware(mux))
+	return logger.LoggingMiddleware(s.contentMiddleware(s.authMiddleware(mux)))
 }
