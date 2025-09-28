@@ -51,6 +51,11 @@ func (r *TestRepositoryMock) GetMerchantByID(ctx context.Context, id int64) (mod
 	return args.Get(0).(model.Merchant), args.Error(1)
 }
 
+func (r *TestRepositoryMock) GetMerchantByCellID(ctx context.Context, cellID int64) (model.Merchant, error) {
+	args := r.Called(ctx, cellID)
+	return args.Get(0).(model.Merchant), args.Error(1)
+}
+
 func (r *TestRepositoryMock) GetItemByID(ctx context.Context, id int64) (model.Item, error) {
 	args := r.Called(ctx, id)
 	return args.Get(0).(model.Item), args.Error(1)

@@ -26,9 +26,17 @@ type OrderItemRequest struct {
 	Quantity int    `json:"quantity" validate:"required,gt=0"`
 }
 
+type FindNearbyMerchantRequest struct {
+	MerchantID       string `query:"merchantId"`
+	Limit            string `query:"limit"`
+	Offset           string `query:"offset"`
+	Name             string `query:"name"`
+	MerchantCategory string `query:"merchantCategory"`
+}
+
 func (r *OrderItemRequest) ToModel() model.OrderItem {
 	return model.OrderItem{
-		ItemID:   utils.ConvertIDString2Int(r.ItemID, 0),
+		ItemID:   utils.String2Int64(r.ItemID, 0),
 		Quantity: r.Quantity,
 	}
 }
@@ -41,7 +49,7 @@ func (r *LocationRequest) ToModel() model.Location {
 }
 
 func (r *OrderRequest) ToModel() model.Order {
-	merchantId := utils.ConvertIDString2Int(r.MerchantID, 0)
+	merchantId := utils.String2Int64(r.MerchantID, 0)
 
 	var orderItems []model.OrderItem
 	for _, item := range r.Items {
@@ -66,4 +74,33 @@ func (r *OrderEstimationRequest) ToModel() model.OrderEstimation {
 	res.UserLocation = r.UserLocation.ToModel()
 	res.Orders = orders
 	return res
+}
+
+func (r *FindNearbyMerchantRequest) ToModel() model.FindNerbyMerchantParams {
+	var params model.FindNerbyMerchantParams
+
+	if r.MerchantID != "" {
+		parsedMerchantID := utils.String2Int64(r.MerchantID, 0)
+		params.MerchantID = &parsedMerchantID
+	}
+
+	if r.Limit != "" {
+		parsedLimit := utils.String2Int32(r.Limit, 5)
+		params.Limit = &parsedLimit
+	}
+
+	if r.Offset != "" {
+		parsedOffset := utils.String2Int32(r.Offset, 0)
+		params.Offset = &parsedOffset
+	}
+
+	if r.Name != "" {
+		params.Name = &r.Name
+	}
+
+	if r.MerchantCategory != "" {
+		params.MerchantCategory = &r.MerchantCategory
+	}
+
+	return params
 }

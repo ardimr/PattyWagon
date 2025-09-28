@@ -25,3 +25,12 @@ type EstimationPrice struct {
 	EstimatedDeliveryInMinutes int64
 	TotalPrice                 int64
 }
+
+type FindNerbyMerchantParams struct {
+	UserLocation     Location
+	MerchantID       *int64
+	Limit            *int
+	Offset           *int
+	Name             *string
+	MerchantCategory *string
+}

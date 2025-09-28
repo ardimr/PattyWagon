@@ -37,6 +37,7 @@ func testPurchaseSetup(t *testing.T) *Server {
 }
 
 func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock) {
+	t.Helper()
 	t.Log("Poplulating Mock Repository")
 	validMerchant := model.Merchant{
 		Location: model.Location{
@@ -62,6 +63,8 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 	repo.Mock.On("GetMerchantByID", mock.Anything, int64(99)).Return(tooFarMerchant, nil)
 	repo.Mock.On("GetMerchantByID", mock.Anything, int64(100)).Return(model.Merchant{}, constants.ErrMerchantNotFound)
 
+	repo.Mock.On("GetMerchantByCellID", mock.Anything, mock.Anything).Return(validMerchant, nil)
+
 	repo.Mock.On("GetItemByID", mock.Anything, mock.MatchedBy(func(id int64) bool {
 		return id >= 1 && id < 99
 	})).Return(validItem, nil)
@@ -69,7 +72,14 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 }
 
 func testPopulateMockLocationService(t *testing.T, svc *mocklocationservice.MockLocationService) {
+	t.Helper()
+
+	neigbhors := []model.Cell{
+		{ID: 1, CellID: 1, MerchantID: 1}, {ID: 2, CellID: 2, MerchantID: 2}, {ID: 3, CellID: 3, MerchantID: 3},
+	}
+
 	svc.Mock.On("EstimateDeliveryTimeInMinutes", mock.Anything, mock.Anything).Return(int64(25), nil)
+	svc.Mock.On("FindNearby", mock.Anything, mock.Anything).Return(neigbhors, nil)
 }
 
 func TestEstimateOrderPrice(t *testing.T) {
@@ -272,6 +282,31 @@ func TestEstimateOrderPrice(t *testing.T) {
 
 		resp := w.Result()
 		assert.Equal(t, 404, resp.StatusCode)
+		fmt.Printf("Response Body: %v\n", w.Body.String())
+	})
+}
+
+func TestGetNearbyMerchants(t *testing.T) {
+	s := testPurchaseSetup(t)
+
+	validReq := FindNearbyMerchantRequest{}
+	userLocation := LocationRequest{
+		Lat:  6.1674,
+		Long: 106.8209,
+	}
+
+	t.Run("Valid", func(t *testing.T) {
+		reqBody, err := json.Marshal(validReq)
+		assert.Nil(t, err)
+
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby", bytes.NewBuffer(reqBody))
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 200, resp.StatusCode)
 		fmt.Printf("Response Body: %v\n", w.Body.String())
 	})
 }

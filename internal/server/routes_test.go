@@ -49,10 +49,10 @@ func testSetup(t *testing.T) *Server {
 	repo := repository.New(db)
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
 	imageCompressor := imagecompressor.New(5, 50)
-	mockSvc := service.NewMockPurchaseService(repo, storage, imageCompressor)
+	svc := service.New(repo, storage, imageCompressor, nil)
 	return &Server{
 		port:      8080,
-		service:   mockSvc,
+		service:   svc,
 		validator: validator.New(),
 	}
 }

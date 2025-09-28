@@ -3,10 +3,34 @@ package service
 import (
 	"PattyWagon/internal/constants"
 	"PattyWagon/internal/model"
+	"PattyWagon/logger"
 	"context"
 
 	"github.com/kwahome/go-haversine/pkg/haversine"
 )
+
+func (s *Service) FindNearbyMerchants(ctx context.Context, searchParams model.FindNerbyMerchantParams) ([]model.Merchant, error) {
+	log := logger.GetLoggerFromContext(ctx)
+
+	var merchants []model.Merchant
+
+	neighborCells, err := s.locationService.FindNearby(ctx, searchParams.UserLocation)
+	if err != nil {
+		return []model.Merchant{}, err
+	}
+
+	for _, cell := range neighborCells {
+		merchant, err := s.repository.GetMerchantByCellID(ctx, cell.CellID)
+		if err != nil {
+			return nil, err
+		}
+
+		merchants = append(merchants, merchant)
+	}
+
+	log.Printf("Total merchants: %d", len(merchants))
+	return merchants, nil
+}
 
 func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.OrderEstimation) (model.EstimationPrice, error) {
 	isStartingPointValid := false

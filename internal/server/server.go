@@ -25,6 +25,7 @@ type Service interface {
 
 	// Purchase
 	EstimateOrderPrice(ctx context.Context, req model.OrderEstimation) (model.EstimationPrice, error)
+	FindNearbyMerchants(ctx context.Context, searchParams model.FindNerbyMerchantParams) ([]model.Merchant, error)
 }
 
 type Server struct {

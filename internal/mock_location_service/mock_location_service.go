@@ -15,3 +15,8 @@ func (m *MockLocationService) EstimateDeliveryTimeInMinutes(ctx context.Context,
 	args := m.Called(ctx, locations)
 	return args.Get(0).(int64), args.Error(1)
 }
+
+func (m *MockLocationService) FindNearby(ctx context.Context, location model.Location) ([]model.Cell, error) {
+	args := m.Called(ctx, location)
+	return args.Get(0).([]model.Cell), args.Error(1)
+}

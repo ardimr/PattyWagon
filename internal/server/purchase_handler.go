@@ -2,18 +2,16 @@ package server
 
 import (
 	"PattyWagon/internal/constants"
+	"PattyWagon/internal/model"
 	"PattyWagon/internal/utils"
-	"PattyWagon/logger"
 	"PattyWagon/observability"
 	"encoding/json"
 	"net/http"
 )
 
-func (s *Server) GetNearbyMerchants(w http.ResponseWriter, r *http.Request) {
+func (s *Server) FindNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 	ctx, span := observability.Tracer.Start(r.Context(), "handler.get_nearby_merchants")
 	defer span.End()
-
-	log := logger.GetLoggerFromContext(ctx)
 
 	if r.Method != http.MethodGet {
 		sendErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -21,6 +19,11 @@ func (s *Server) GetNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 	}
 
 	coordinate := r.PathValue("coordinate")
+	if coordinate == "" {
+		sendErrorResponse(w, http.StatusBadRequest, "coordinate must not be empty")
+		return
+	}
+
 	lat, lng, err := utils.ValidateAndExtractCoordinate(coordinate)
 	if err != nil {
 		switch err {
@@ -32,8 +35,21 @@ func (s *Server) GetNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("lat: %f, long: %f", lat, lng)
+	userLocation := model.Location{
+		Lat:  lat,
+		Long: lng,
+	}
 
+	searchParams := model.FindNerbyMerchantParams{
+		UserLocation: userLocation,
+	}
+
+	merchants, err := s.service.FindNearbyMerchants(ctx, searchParams)
+	if err != nil {
+		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+	}
+
+	sendResponse(w, http.StatusOK, merchants)
 }
 
 func (s *Server) EstimateOrderPrice(w http.ResponseWriter, r *http.Request) {

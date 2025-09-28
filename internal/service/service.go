@@ -31,6 +31,7 @@ type Repository interface {
 
 	// Merchant Repository
 	GetMerchantByID(ctx context.Context, id int64) (model.Merchant, error)
+	GetMerchantByCellID(ctx context.Context, cellID int64) (model.Merchant, error)
 
 	// Item
 	GetItemByID(ctx context.Context, id int64) (model.Item, error)
@@ -61,4 +62,5 @@ func New(repository Repository, storage Storage, imageCompressor ImageCompressor
 
 type LocationService interface {
 	EstimateDeliveryTimeInMinutes(ctx context.Context, locations []model.Location) (int64, error)
+	FindNearby(ctx context.Context, location model.Location) ([]model.Cell, error)
 }
