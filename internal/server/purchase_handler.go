@@ -60,6 +60,8 @@ func (s *Server) EstimateOrderPrice(w http.ResponseWriter, r *http.Request) {
 		switch err {
 		case constants.ErrMerchantNotFound:
 			sendErrorResponse(w, http.StatusNotFound, err.Error())
+		case constants.ErrItemNotFound:
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
 		case constants.ErrInvalidStartingPoint:
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		case constants.ErrMerchantTooFar:

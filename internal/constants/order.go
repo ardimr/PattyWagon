@@ -5,5 +5,6 @@ import "errors"
 var (
 	ErrInvalidStartingPoint = errors.New("Invalid starting point")
 	ErrMerchantTooFar       = errors.New("Merchant is too far")
-	ErrMerchantNotFound     = errors.New("Merchant is not  found")
+	ErrMerchantNotFound     = errors.New("Merchant is not found")
+	ErrItemNotFound         = errors.New("Item is not found")
 )

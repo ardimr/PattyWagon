@@ -11,6 +11,10 @@ type Order struct {
 	Items           []OrderItem
 }
 
+type Item struct {
+	ID    int64
+	Price int64
+}
 type OrderItem struct {
 	ItemID   int64
 	Quantity int

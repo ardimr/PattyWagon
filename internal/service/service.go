@@ -9,6 +9,7 @@ type Service struct {
 	repository      Repository
 	storage         Storage
 	imageCompressor ImageCompressor
+	locationService LocationService
 }
 
 // note: not ideal, might need adapter layer because return type is defined in the repository package
@@ -30,6 +31,9 @@ type Repository interface {
 
 	// Merchant Repository
 	GetMerchantByID(ctx context.Context, id int64) (model.Merchant, error)
+
+	// Item
+	GetItemByID(ctx context.Context, id int64) (model.Item, error)
 }
 
 type Storage interface {
@@ -46,10 +50,15 @@ type LocationService interface {
 	FindKRingCellIDs(ctx context.Context, location model.Location, k int) ([]model.Cell, error)
 }
 
-func New(repository Repository, storage Storage, imageCompressor ImageCompressor) *Service {
+func New(repository Repository, storage Storage, imageCompressor ImageCompressor, locationService LocationService) *Service {
 	return &Service{
 		repository:      repository,
 		storage:         storage,
 		imageCompressor: imageCompressor,
+		locationService: locationService,
 	}
+}
+
+type LocationService interface {
+	EstimateDeliveryTimeInMinutes(ctx context.Context, locations []model.Location) (int64, error)
 }
