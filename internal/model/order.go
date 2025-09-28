@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type OrderEstimation struct {
 	UserLocation Location
 	Orders       []Order
@@ -12,9 +14,14 @@ type Order struct {
 }
 
 type Item struct {
-	ID    int64
-	Price int64
+	ID              int64
+	Name            string
+	Price           int64
+	ProductCategory string
+	ImageUrl        string
+	CreatedAt       time.Time
 }
+
 type OrderItem struct {
 	ItemID   int64
 	Quantity int
@@ -27,10 +34,11 @@ type EstimationPrice struct {
 }
 
 type FindNerbyMerchantParams struct {
-	UserLocation     Location
-	MerchantID       *int64
-	Limit            *int
-	Offset           *int
-	Name             *string
-	MerchantCategory *string
+	UserLocation Location
+	MerchantParams
+}
+
+type MerchantItem struct {
+	Merchant Merchant
+	Items    []Item
 }

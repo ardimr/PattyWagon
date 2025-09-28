@@ -2,7 +2,6 @@ package server
 
 import (
 	"PattyWagon/internal/constants"
-	"PattyWagon/internal/model"
 	"PattyWagon/internal/utils"
 	"PattyWagon/observability"
 	"encoding/json"
@@ -35,21 +34,26 @@ func (s *Server) FindNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userLocation := model.Location{
+	userLocation := LocationRequest{
 		Lat:  lat,
 		Long: lng,
 	}
 
-	searchParams := model.FindNerbyMerchantParams{
-		UserLocation: userLocation,
+	query := r.URL.Query()
+	searchParams := FindNearbyMerchantRequest{
+		MerchantID:       query.Get("merchantId"),
+		Limit:            query.Get("limit"),
+		Offset:           query.Get("offset"),
+		Name:             query.Get("name"),
+		MerchantCategory: query.Get("merchantCategory"),
 	}
 
-	merchants, err := s.service.FindNearbyMerchants(ctx, searchParams)
+	merchants, err := s.service.FindNearbyMerchants(ctx, userLocation.ToModel(), searchParams.ToModel())
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 	}
-
-	sendResponse(w, http.StatusOK, merchants)
+	resp := NewFindNearbyMerchantsResponse(merchants)
+	sendResponse(w, http.StatusOK, resp)
 }
 
 func (s *Server) EstimateOrderPrice(w http.ResponseWriter, r *http.Request) {

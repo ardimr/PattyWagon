@@ -27,6 +27,7 @@ type OrderItemRequest struct {
 }
 
 type FindNearbyMerchantRequest struct {
+	UserLocation     LocationRequest
 	MerchantID       string `query:"merchantId"`
 	Limit            string `query:"limit"`
 	Offset           string `query:"offset"`
@@ -84,15 +85,9 @@ func (r *FindNearbyMerchantRequest) ToModel() model.FindNerbyMerchantParams {
 		params.MerchantID = &parsedMerchantID
 	}
 
-	if r.Limit != "" {
-		parsedLimit := utils.String2Int32(r.Limit, 5)
-		params.Limit = &parsedLimit
-	}
+	params.Limit = utils.String2Int32(r.Limit, 5)
 
-	if r.Offset != "" {
-		parsedOffset := utils.String2Int32(r.Offset, 0)
-		params.Offset = &parsedOffset
-	}
+	params.Offset = utils.String2Int32(r.Offset, 0)
 
 	if r.Name != "" {
 		params.Name = &r.Name

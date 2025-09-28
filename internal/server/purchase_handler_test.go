@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
@@ -38,12 +39,17 @@ func testPurchaseSetup(t *testing.T) *Server {
 
 func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock) {
 	t.Helper()
-	t.Log("Poplulating Mock Repository")
+	t.Log("Populating Mock Repository")
 	validMerchant := model.Merchant{
 		Location: model.Location{
 			Lat:  6.1753,
 			Long: 106.8271,
 		},
+		Name:             "Store A",
+		MerchantCategory: "TODO",
+		ImageUrl:         "http://minio",
+		ID:               1,
+		CreatedAt:        time.Now(),
 	}
 
 	tooFarMerchant := model.Merchant{
@@ -51,11 +57,28 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 			Lat:  35.6764,
 			Long: 139.6500,
 		},
+		Name:             "Store A",
+		MerchantCategory: "TODO",
+		ImageUrl:         "http://minio",
+		ID:               1,
+		CreatedAt:        time.Now(),
 	}
 
 	validItem := model.Item{
 		ID:    1,
 		Price: 10,
+	}
+
+	validItems := []model.Item{
+		{ID: 1, Price: 10, Name: "Bakso"},
+		{ID: 2, Price: 15, Name: "Mie Ayam"},
+	}
+	validMerchantWithItems := []model.MerchantItem{
+		{Merchant: validMerchant, Items: validItems},
+		{Merchant: validMerchant, Items: validItems},
+		{Merchant: validMerchant, Items: validItems},
+		{Merchant: validMerchant, Items: validItems},
+		{Merchant: validMerchant, Items: validItems},
 	}
 
 	repo.Mock.On("GetMerchantByID", mock.Anything, int64(1)).Return(validMerchant, nil)
@@ -64,6 +87,7 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 	repo.Mock.On("GetMerchantByID", mock.Anything, int64(100)).Return(model.Merchant{}, constants.ErrMerchantNotFound)
 
 	repo.Mock.On("GetMerchantByCellID", mock.Anything, mock.Anything).Return(validMerchant, nil)
+	repo.Mock.On("ListMerchantWithItems", mock.Anything, mock.Anything).Return(validMerchantWithItems, nil)
 
 	repo.Mock.On("GetItemByID", mock.Anything, mock.MatchedBy(func(id int64) bool {
 		return id >= 1 && id < 99
@@ -76,10 +100,11 @@ func testPopulateMockLocationService(t *testing.T, svc *mocklocationservice.Mock
 
 	neigbhors := []model.Cell{
 		{ID: 1, CellID: 1, MerchantID: 1}, {ID: 2, CellID: 2, MerchantID: 2}, {ID: 3, CellID: 3, MerchantID: 3},
+		{ID: 4, CellID: 4, MerchantID: 1}, {ID: 5, CellID: 5, MerchantID: 2}, {ID: 6, CellID: 6, MerchantID: 3},
 	}
 
 	svc.Mock.On("EstimateDeliveryTimeInMinutes", mock.Anything, mock.Anything).Return(int64(25), nil)
-	svc.Mock.On("FindNearby", mock.Anything, mock.Anything).Return(neigbhors, nil)
+	svc.Mock.On("FindNearby", mock.Anything, mock.Anything, mock.Anything).Return(neigbhors, nil)
 }
 
 func TestEstimateOrderPrice(t *testing.T) {
@@ -289,14 +314,15 @@ func TestEstimateOrderPrice(t *testing.T) {
 func TestGetNearbyMerchants(t *testing.T) {
 	s := testPurchaseSetup(t)
 
-	validReq := FindNearbyMerchantRequest{}
+	filter := FindNearbyMerchantRequest{}
+
 	userLocation := LocationRequest{
 		Lat:  6.1674,
 		Long: 106.8209,
 	}
 
 	t.Run("Valid", func(t *testing.T) {
-		reqBody, err := json.Marshal(validReq)
+		reqBody, err := json.Marshal(filter)
 		assert.Nil(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby", bytes.NewBuffer(reqBody))

@@ -1,7 +1,27 @@
 package model
 
+import "time"
+
 type Merchant struct {
-	Location Location
+	ID               int64
+	Location         Location
+	Name             string
+	MerchantCategory string
+	ImageUrl         string
+	CreatedAt        time.Time
+}
+
+type ListMerchantWithItemParams struct {
+	Cells []Cell
+	MerchantParams
+}
+
+type MerchantParams struct {
+	MerchantID       *int64
+	Limit            int
+	Offset           int
+	Name             *string
+	MerchantCategory *string
 }
 
 type Cell struct {

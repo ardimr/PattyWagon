@@ -60,3 +60,8 @@ func (r *TestRepositoryMock) GetItemByID(ctx context.Context, id int64) (model.I
 	args := r.Called(ctx, id)
 	return args.Get(0).(model.Item), args.Error(1)
 }
+
+func (r *TestRepositoryMock) ListMerchantWithItems(ctx context.Context, params model.ListMerchantWithItemParams) ([]model.MerchantItem, error) {
+	args := r.Called(ctx, params)
+	return args.Get(0).([]model.MerchantItem), args.Error(1)
+}
