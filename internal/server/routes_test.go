@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,15 @@ func testSetup(t *testing.T) *Server {
 	t.Setenv("S3_MAX_CONCURRENT_UPLOAD", "5")
 	t.Setenv("MAX_CONCURRENT_COMPRESS", "10")
 
-	db := database.New()
+	db := database.New(
+		"localhost", "5432", "patty-waagon-dev", "postgres", "postgres", "public",
+		&database.ConnectionPoolConfig{
+			MaxOpenConns:    10,
+			MaxIdleConns:    5,
+			ConnMaxIdleTime: time.Minute * 5,
+			ConnMaxLifeTime: time.Minute * 10,
+		},
+	)
 	repo := repository.New(db)
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
 	imageCompressor := imagecompressor.New(5, 50)
