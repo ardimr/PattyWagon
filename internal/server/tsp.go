@@ -1,5 +1,6 @@
 import (
 	"math"
+	"fmt"
 )
 
 type Location struct {
@@ -35,7 +36,8 @@ func toDistanceGraph() map[string]map[string]float64 {
 		{"Merchant A", 40.7128, -74.0060},
 		{"Merchant B", 37.1234, -122.6543},
 		{"Merchant C", -12.8756, 45.1234},
-		{"User D", 51.5076, -0.1227},
+		{"Merchant D", 51.5076, -0.1227},
+		{"user x", 22.1234, -11.5678}
 	}
 	n := len(locations)
 	graph := make(map[string]map[string]float64)
@@ -74,3 +76,43 @@ func permutations(arr []string) [][]string {
 	return res
 }
 
+func BruteForce() {
+	graphDistance := toDistanceGraph()
+
+	merchant := []string{"Merchant A", "Merchant B", "Merchant C", "Merchant D"}
+	destination := "user x"
+
+	minCost := math.MaxFloat64
+	var bestPath []string
+
+	for _, perm := range permutations(merchant) {
+		cost := 0
+		valid := true
+
+		for i := 0; i < len(perm)-1; i++ {
+			from, to := perm[i], perm[i+1]
+			if c, ok := graph[from][to]; ok {
+				cost += c
+			} else {
+				valid = false
+				break
+			}
+		}
+
+		// Add final leg to destination
+		last := perm[len(perm)-1]
+		if c, ok := graph[last][destination]; ok && valid {
+			cost += c
+		} else {
+			valid = false
+		}
+
+		if valid && cost < minCost {
+			minCost = cost
+			bestPath = append([]string{}, perm...)
+			bestPath = append(bestPath, destination)
+		}
+	}
+	fmt.Println(bestPath)
+	fmt.Println(minCost)
+}
