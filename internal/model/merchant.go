@@ -13,3 +13,12 @@ type Merchant struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
+
+type FilterMerchant struct {
+	MerchantID       int64
+	Limit            int
+	Offset           int
+	Name             string
+	MerchantCategory string
+	CreatedAt        string
+}

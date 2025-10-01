@@ -48,3 +48,23 @@ type FileUploadResponse struct {
 type CreateMerchantResponse struct {
 	MerchantID string `json:"merchantId"`
 }
+
+type GetMerchantResponse struct {
+	Data []DetailMerchant `json:"data"`
+	Meta Meta             `json:"meta"`
+}
+
+type DetailMerchant struct {
+	MerchantID string         `json:"merchantId"`
+	Name       string         `json:"name"`
+	Category   string         `json:"category"`
+	ImageURL   string         `json:"image_url"`
+	Location   DetailLocation `json:"location"`
+	CreatedAt  string         `json:"createdAt"`
+}
+
+type Meta struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
+}

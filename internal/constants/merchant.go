@@ -1,3 +1,15 @@
 package constants
 
-var MerchantCategory = []string{"SmallRestaurant", "MediumRestaurant", "MerchandiseRestaurant", "BoothKiosk", "ConvenienceStore"}
+var MerchantCategorySet = map[string]struct{}{
+	"SmallRestaurant":       {},
+	"MediumRestaurant":      {},
+	"LargeRestaurant":       {},
+	"MerchandiseRestaurant": {},
+	"BoothKiosk":            {},
+	"ConvenienceStore":      {},
+}
+
+func IsValidMerchantCategory(cat string) bool {
+	_, ok := MerchantCategorySet[cat]
+	return ok
+}

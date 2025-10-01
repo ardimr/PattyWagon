@@ -29,6 +29,7 @@ type Repository interface {
 
 	// Merchant Repository
 	InsertMerchant(ctx context.Context, data model.Merchant) (res int64, err error)
+	GetMerchants(ctx context.Context, filter model.FilterMerchant) (res []model.Merchant, err error)
 }
 
 type Storage interface {

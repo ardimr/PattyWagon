@@ -24,3 +24,23 @@ func (s *Service) CreateMerchant(ctx context.Context, req model.Merchant) (res i
 
 	return res, nil
 }
+
+func (s *Service) GetMerchants(ctx context.Context, req model.FilterMerchant) (res []model.Merchant, err error) {
+	//
+	// Get Merchants
+	//
+	paramsFetchMerchant := model.FilterMerchant{
+		MerchantID:       req.MerchantID,
+		Limit:            req.Limit,
+		Offset:           req.Offset,
+		Name:             req.Name,
+		MerchantCategory: req.MerchantCategory,
+		CreatedAt:        req.CreatedAt,
+	}
+	res, err = s.repository.GetMerchants(ctx, paramsFetchMerchant)
+	if err != nil {
+		return []model.Merchant{}, err
+	}
+
+	return res, nil
+}

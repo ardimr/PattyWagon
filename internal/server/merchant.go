@@ -1,6 +1,7 @@
 package server
 
 import (
+	"PattyWagon/internal/constants"
 	"PattyWagon/internal/model"
 	"PattyWagon/internal/utils"
 	"encoding/json"
@@ -62,4 +63,65 @@ func (s *Server) createMerchantHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendResponse(w, http.StatusCreated, response)
+}
+
+func (s *Server) getMerchantHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	if r.Method != http.MethodGet {
+		sendErrorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	query := r.URL.Query()
+	req := GetMerchantRequest{
+		MerchantID:       query.Get("merchantId"),
+		Limit:            query.Get("limit"),
+		Offset:           query.Get("offset"),
+		Name:             query.Get("name"),
+		MerchantCategory: query.Get("merchantCategory"),
+		CreatedAt:        query.Get("createdAt"),
+	}
+
+	merchantIDint, _ := strconv.Atoi(req.MerchantID)
+	limitInt, _ := strconv.Atoi(req.Limit)
+	offsetInt, _ := strconv.Atoi(req.Offset)
+
+	paramsMerchant := model.FilterMerchant{
+		MerchantID:       int64(merchantIDint),
+		Limit:            limitInt,
+		Offset:           offsetInt,
+		Name:             req.Name,
+		MerchantCategory: req.MerchantCategory,
+		CreatedAt:        req.CreatedAt,
+	}
+
+	if paramsMerchant.Limit <= 0 {
+		paramsMerchant.Limit = 5
+	}
+	if paramsMerchant.Offset < 0 {
+		paramsMerchant.Offset = 0
+	}
+
+	if paramsMerchant.MerchantCategory != "" {
+		if !constants.IsValidMerchantCategory(paramsMerchant.MerchantCategory) {
+			sendResponse(w, http.StatusOK, []model.Merchant{})
+			return
+		}
+	}
+
+	if paramsMerchant.CreatedAt != "" {
+		if !strings.EqualFold(paramsMerchant.CreatedAt, "asc") &&
+			!strings.EqualFold(paramsMerchant.CreatedAt, "desc") {
+			paramsMerchant.CreatedAt = ""
+		}
+	}
+
+	res, err := s.service.GetMerchants(ctx, paramsMerchant)
+	if err != nil {
+		log.Printf("failed to get merchants: %s\n", err.Error())
+		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	sendResponse(w, http.StatusOK, res)
 }

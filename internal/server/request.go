@@ -22,3 +22,12 @@ type DetailLocation struct {
 	Latitude  float64 `json:"latitude" validate:"required"`
 	Longitude float64 `json:"longitude" validate:"required"`
 }
+
+type GetMerchantRequest struct {
+	MerchantID       string `query:"merchantId"`
+	Limit            string `query:"limit"`
+	Offset           string `query:"offset"`
+	Name             string `query:"name"`
+	MerchantCategory string `query:"merchantCategory"`
+	CreatedAt        string `query:"createdAt"`
+}
