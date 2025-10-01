@@ -5,7 +5,10 @@ import (
 	"PattyWagon/observability"
 	"fmt"
 	"net/http"
-	"strconv"
+)
+
+const (
+	SuccessUploadMsg string = "File uploaded sucessfully"
 )
 
 func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,21 +34,15 @@ func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	uploadedFile, err := s.service.UploadFile(ctx, file, header.Filename, header.Size)
 	if err != nil {
-		switch err {
-		case constants.ErrMaximumFileSize:
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
-		case constants.ErrInvalidFileType:
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
-		default:
-			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
-		}
+		handleServiceError(w, err, nil)
 		return
 	}
 
 	resp := FileUploadResponse{
-		FileID:           strconv.FormatInt(uploadedFile.ID, 10),
-		FileUri:          uploadedFile.Uri,
-		FileThumbnailUri: uploadedFile.ThumbnailUri,
+		Message: SuccessUploadMsg,
+		Data: FileUploadData{
+			ImageUrl: uploadedFile.Uri,
+		},
 	}
 
 	sendResponse(w, http.StatusOK, resp)
