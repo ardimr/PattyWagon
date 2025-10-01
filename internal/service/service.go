@@ -39,6 +39,12 @@ type ImageCompressor interface {
 	Compress(ctx context.Context, src string) (string, error)
 }
 
+type LocationService interface {
+	GetAllCellIDs(ctx context.Context, location model.Location) ([]model.Cell, error)
+	FindCellIDByResolution(ctx context.Context, location model.Location, resolution int) (model.Cell, error)
+	FindKRingCellIDs(ctx context.Context, location model.Location, k int) ([]model.Cell, error)
+}
+
 func New(repository Repository, storage Storage, imageCompressor ImageCompressor) *Service {
 	return &Service{
 		repository:      repository,
