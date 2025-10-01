@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"PattyWagon/internal/constants"
 	"PattyWagon/internal/model"
 	"context"
 	"fmt"
@@ -117,4 +118,17 @@ func (q *Queries) GetMerchants(ctx context.Context, filter model.FilterMerchant)
 
 	res = merchants
 	return
+}
+
+func (r *Queries) MerchantExists(ctx context.Context, merchantID int64) (res bool, err error) {
+	var exists bool
+	err = r.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM merchants WHERE id=$1)", merchantID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	if !exists {
+		return false, constants.ErrMerchantNotFound
+	}
+
+	return exists, nil
 }

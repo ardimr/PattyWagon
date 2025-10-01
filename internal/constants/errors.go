@@ -25,4 +25,5 @@ var (
 	ErrInvalidPhoneNumberFormat       = errors.New("invalid phone number format")
 	ErrNotEqualAvailableSellersInCart = errors.New("not equal to the available sellers in the cart")
 	ErrPurchaseNotFound               = errors.New("purchase not found")
+	ErrMerchantNotFound               = errors.New("merchant not found")
 )

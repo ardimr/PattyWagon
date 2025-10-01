@@ -31,3 +31,10 @@ type GetMerchantRequest struct {
 	MerchantCategory string `query:"merchantCategory"`
 	CreatedAt        string `query:"createdAt"`
 }
+
+type CreateItemRequest struct {
+	Name            string  `json:"name" validate:"required,min=2,max=30"`
+	ProductCategory string  `json:"productCategory" validate:"required,productCategory"`
+	Price           float64 `json:"price" validate:"required,gt=0"`
+	ImageURL        string  `json:"imageUrl" validate:"required,url"`
+}

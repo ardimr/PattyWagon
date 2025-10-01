@@ -68,3 +68,7 @@ type Meta struct {
 	Offset int `json:"offset"`
 	Total  int `json:"total"`
 }
+
+type CreateItemResponse struct {
+	itemID string `json:"itemId"`
+}

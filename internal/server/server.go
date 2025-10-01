@@ -25,6 +25,8 @@ type Service interface {
 
 	CreateMerchant(ctx context.Context, req model.Merchant) (res int64, err error)
 	GetMerchants(ctx context.Context, req model.FilterMerchant) (res []model.Merchant, err error)
+
+	CreateItems(ctx context.Context, req model.Item) (res int64, err error)
 }
 
 type Server struct {
@@ -42,9 +44,13 @@ func NewServer(service Service) *http.Server {
 		validator: v,
 	}
 
-	// Custom validator for product type
+	// Custom validator for merchant category
 	NewServer.validator.RegisterValidation("merchantCategory", func(fl validator.FieldLevel) bool {
 		return constants.IsValidMerchantCategory(fl.Field().String())
+	})
+	// Custom validator for product category
+	NewServer.validator.RegisterValidation("productCategory", func(fl validator.FieldLevel) bool {
+		return constants.IsValidProductCategory(fl.Field().String())
 	})
 
 	// Declare Server config
