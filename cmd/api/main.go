@@ -3,6 +3,7 @@ package main
 import (
 	"PattyWagon/internal/database"
 	imagecompressor "PattyWagon/internal/image_compressor"
+	"PattyWagon/internal/location"
 	"PattyWagon/internal/repository"
 	"PattyWagon/internal/service"
 	"PattyWagon/internal/storage"
@@ -67,7 +68,8 @@ func main() {
 	repo := repository.New(db)
 	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 25})
 	imageCompressor := imagecompressor.New(imagecompressor.MaxConcurrentCompress, imagecompressor.CompressionQuality)
-	svc := service.New(repo, storage, imageCompressor)
+	locationService := location.NewService()
+	svc := service.New(repo, storage, imageCompressor, locationService)
 	serv := server.NewServer(svc)
 
 	observability.SetupTracer(context.Background(), observability.OtlpEndpoint)
