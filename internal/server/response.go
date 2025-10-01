@@ -44,3 +44,7 @@ type FileUploadResponse struct {
 	FileUri          string `json:"fileUri"`
 	FileThumbnailUri string `json:"fileThumbnailUri"`
 }
+
+type CreateMerchantResponse struct {
+	MerchantID string `json:"merchantId"`
+}

@@ -10,3 +10,15 @@ type RegisterRequest struct {
 	Password string `json:"password" validate:"required,min=5,max=30"`
 	Email    string `json:"email" validate:"required,email"`
 }
+
+type CreateMerchantRequest struct {
+	Name     string         `json:"name" validate:"required,min=2,max=30"`
+	Category string         `json:"category" validate:"required,merchantCategory"`
+	ImageURL string         `json:"image_url" validate:"required"`
+	Location DetailLocation `json:"location" validate:"required"`
+}
+
+type DetailLocation struct {
+	Latitude  float64 `json:"latitude" validate:"required"`
+	Longitude float64 `json:"longitude" validate:"required"`
+}

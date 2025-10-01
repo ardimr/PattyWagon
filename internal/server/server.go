@@ -1,6 +1,7 @@
 package server
 
 import (
+	"PattyWagon/internal/constants"
 	"PattyWagon/internal/model"
 	"context"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -20,6 +22,8 @@ type Service interface {
 	Register(ctx context.Context, userReq model.User, password string, role int16) (string, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
+
+	CreateMerchant(ctx context.Context, req model.Merchant) (res int64, err error)
 }
 
 type Server struct {
@@ -38,15 +42,15 @@ func NewServer(service Service) *http.Server {
 	}
 
 	// Custom validator for product type
-	// NewServer.validator.RegisterValidation("productType", func(fl validator.FieldLevel) bool {
-	// 	productType := fl.Field().String()
-	// 	for _, pt := range constants.ProductTypes {
-	// 		if strings.EqualFold(pt, productType) {
-	// 			return true
-	// 		}
-	// 	}
-	// 	return false
-	// })
+	NewServer.validator.RegisterValidation("merchantCategory", func(fl validator.FieldLevel) bool {
+		productType := fl.Field().String()
+		for _, ctgry := range constants.MerchantCategory {
+			if strings.EqualFold(ctgry, productType) {
+				return true
+			}
+		}
+		return false
+	})
 
 	// Declare Server config
 	server := &http.Server{
