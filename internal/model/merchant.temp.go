@@ -12,7 +12,7 @@ type Merchant struct {
 }
 
 type ListMerchantWithItemParams struct {
-	Cells []Cell
+	Cell Cell
 	MerchantParams
 }
 
@@ -31,12 +31,6 @@ type MerchantLocation struct {
 	Resolution int8
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-}
-
-type Cell struct {
-	ID         int64
-	CellID     int64
-	MerchantID int64
 }
 
 type MerchantCategory string

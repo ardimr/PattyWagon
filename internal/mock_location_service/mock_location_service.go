@@ -20,3 +20,18 @@ func (m *MockLocationService) FindNearby(ctx context.Context, location model.Loc
 	args := m.Called(ctx, location, searchingLevel)
 	return args.Get(0).([]model.Cell), args.Error(1)
 }
+
+func (m *MockLocationService) GetAllCellIDs(ctx context.Context, location model.Location) ([]model.Cell, error) {
+	args := m.Called(ctx, location, location)
+	return args.Get(0).([]model.Cell), args.Error(1)
+}
+
+func (m *MockLocationService) FindCellIDByResolution(ctx context.Context, location model.Location, resolution int) (model.Cell, error) {
+	args := m.Called(ctx, location, resolution)
+	return args.Get(0).(model.Cell), args.Error(1)
+}
+
+func (m *MockLocationService) FindKRingCellIDs(ctx context.Context, location model.Location, k int) ([]model.Cell, error) {
+	args := m.Called(ctx, location, k)
+	return args.Get(0).([]model.Cell), args.Error(1)
+}

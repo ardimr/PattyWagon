@@ -3,8 +3,8 @@ package constants
 import "errors"
 
 var (
-	ErrInvalidStartingPoint = errors.New("Invalid starting point")
-	ErrMerchantTooFar       = errors.New("Merchant is too far")
-	ErrMerchantNotFound     = errors.New("Merchant is not found")
-	ErrItemNotFound         = errors.New("Item is not found")
+	ErrInvalidStartingPoint = errors.New("invalid starting point")
+	ErrMerchantTooFar       = errors.New("merchant is too far")
+	ErrMerchantNotFound     = errors.New("merchant is not found")
+	ErrItemNotFound         = errors.New("item is not found")
 )

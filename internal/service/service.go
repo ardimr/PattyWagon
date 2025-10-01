@@ -59,8 +59,3 @@ func New(repository Repository, storage Storage, imageCompressor ImageCompressor
 		locationService: locationService,
 	}
 }
-
-type LocationService interface {
-	EstimateDeliveryTimeInMinutes(ctx context.Context, locations []model.Location) (int64, error)
-	FindNearby(ctx context.Context, location model.Location, searchingLevel int) ([]model.Cell, error)
-}

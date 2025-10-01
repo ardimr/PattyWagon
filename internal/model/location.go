@@ -6,10 +6,7 @@ type Cell struct {
 }
 
 type Location struct {
-	Lat  float64
-	Long float64
-}
-
-type MerchantLocation struct {
-	//TODO: sesuai DB
+	Lat             float64
+	Long            float64
+	IsStartingPoint bool
 }
