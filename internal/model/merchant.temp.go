@@ -24,6 +24,15 @@ type MerchantParams struct {
 	MerchantCategory *string
 }
 
+type MerchantLocation struct {
+	ID         int64
+	MerchantID int64
+	H3Index    int64
+	Resolution int8
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+}
+
 type Cell struct {
 	ID         int64
 	CellID     int64
