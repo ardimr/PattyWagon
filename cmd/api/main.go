@@ -48,8 +48,22 @@ func main() {
 	// Init logger
 	logger.Init()
 
-	db := database.New()
+	db := database.New(
+		database.Host,
+		database.Port,
+		database.DatabaseName,
+		database.Username,
+		database.Password,
+		database.Schema,
+		&database.ConnectionPoolConfig{
+			MaxOpenConns:    int(database.MaxOpenConns),
+			MaxIdleConns:    int(database.MaxIdleConns),
+			ConnMaxIdleTime: time.Duration(database.ConnMaxIdleTime * int64(time.Second)),
+			ConnMaxLifeTime: time.Duration(database.ConnMaxLifeTime * int64(time.Second)),
+		},
+	)
 	defer db.Close()
+
 	repo := repository.New(db)
 	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 25})
 	imageCompressor := imagecompressor.New(imagecompressor.MaxConcurrentCompress, imagecompressor.CompressionQuality)
