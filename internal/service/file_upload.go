@@ -24,9 +24,10 @@ func (s *Service) UploadFile(ctx context.Context, file io.Reader, filename strin
 
 	var result model.File
 
-	if sizeInBytes > constants.MaxUploadSizeInBytes {
-		return result, constants.ErrMaximumFileSize
+	if err := utils.ValidateFileSize(sizeInBytes); err != nil {
+		return result, constants.ErrInvalidFileType
 	}
+
 	if err := utils.ValidateFileExtensions(filename, constants.AllowedExtensions); err != nil {
 		return result, constants.ErrInvalidFileType
 	}

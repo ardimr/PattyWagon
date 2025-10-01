@@ -17,7 +17,7 @@ func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseMultipartForm(150 << 10); err != nil { // 150 KB
+	if err := r.ParseMultipartForm(int64(constants.MaxUploadForm)); err != nil { // 3 MB
 		sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("error parsing multipart form: %v", err))
 		return
 	}
