@@ -26,17 +26,7 @@ func radians(deg float64) float64 {
 	return deg * math.Pi / 180
 }
 
-func toDistanceGraph() map[string]map[string]float64 {
-
-	// assume the location is from variabel input
-	var locations = []Location{
-		{"Merchant Start", 22.1234, 12.5678},
-		{"Merchant A", 40.7128, -74.0060},
-		{"Merchant B", 37.1234, -122.6543},
-		{"Merchant C", -12.8756, 45.1234},
-		{"Merchant D", 51.5076, -0.1227},
-		{"user x", 22.1234, -11.5678},
-	}
+func toDistanceGraph(locations []Location) map[string]map[string]float64 {
 	n := len(locations)
 	graph := make(map[string]map[string]float64)
 	for i := 0; i < n; i++ {
@@ -71,16 +61,33 @@ func permutations(arr []string) [][]string {
 	}
 
 	helper(arr, 0)
-	fmt.Println(res)
 	return res
 }
 
+// func BruteForce(startLocation, userLocation Location, merchantLocation []Location) {
 func BruteForce() {
-	graphDistance := toDistanceGraph()
+	startLocation := Location{"Merchant Start", 22.1234, 12.5678}
+	userLocation := Location{"user x", 22.1234, -11.5678}
 
-	start := "Merchant Start"
-	merchant := []string{"Merchant A", "Merchant B", "Merchant C", "Merchant D"}
-	destination := "user x"
+	merchantLocation := []Location{
+		{"Merchant A", 40.7128, -74.0060},
+		{"Merchant B", 37.1234, -122.6543},
+		{"Merchant C", -12.8756, 45.1234},
+		{"Merchant D", 51.5076, -0.1227},
+	}
+
+	var merchant []string
+	locations := []Location{startLocation}
+	for _, loc := range merchantLocation {
+		locations = append(locations, loc)
+		merchant = append(merchant, loc.Name)
+	}
+	locations = append(locations, userLocation)
+
+	graphDistance := toDistanceGraph(locations)
+
+	start := startLocation.Name
+	destination := userLocation.Name
 
 	minCost := math.MaxFloat64
 	var bestPath []string
