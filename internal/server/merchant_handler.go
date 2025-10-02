@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (s *Server) createMerchantHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,11 +117,42 @@ func (s *Server) getMerchantHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	res, err := s.service.GetMerchants(ctx, paramsMerchant)
+	merchants, err := s.service.GetMerchants(ctx, paramsMerchant)
 	if err != nil {
 		log.Printf("failed to get merchants: %s\n", err.Error())
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	var detailMerchants []DetailMerchant
+	var meta Meta
+	if len(merchants) > 0 {
+		for _, merchant := range merchants {
+			detailMerchants = append(detailMerchants, DetailMerchant{
+				MerchantID: strconv.Itoa(int(merchant.ID)),
+				Name:       merchant.Name,
+				Category:   utils.PointerValue(merchant.Category, ""),
+				ImageURL:   merchant.ImageURL,
+				Location: DetailLocation{
+					Latitude:  merchant.Latitude,
+					Longitude: merchant.Longitude,
+				},
+				CreatedAt: merchant.CreatedAt.Format(time.RFC3339),
+			})
+		}
+	} else {
+		detailMerchants = []DetailMerchant{}
+	}
+
+	meta = Meta{
+		Limit:  paramsMerchant.Limit,
+		Offset: paramsMerchant.Offset,
+		Total:  len(detailMerchants),
+	}
+
+	res := GetMerchantResponse{
+		Data: detailMerchants,
+		Meta: meta,
 	}
 
 	sendResponse(w, http.StatusOK, res)
