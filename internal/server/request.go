@@ -38,3 +38,12 @@ type CreateItemRequest struct {
 	Price           float64 `json:"price" validate:"required,gt=0"`
 	ImageURL        string  `json:"imageUrl" validate:"required,url"`
 }
+
+type GetItemsRequest struct {
+	ItemID          string `query:"itemId"`
+	Limit           string `query:"limit"`
+	Offset          string `query:"offset"`
+	Name            string `query:"name"`
+	ProductCategory string `query:"productCategory"`
+	CreatedAt       string `query:"createdAt"`
+}

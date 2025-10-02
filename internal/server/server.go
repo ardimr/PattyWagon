@@ -27,6 +27,7 @@ type Service interface {
 	GetMerchants(ctx context.Context, req model.FilterMerchant) (res []model.Merchant, err error)
 
 	CreateItems(ctx context.Context, req model.Item) (res int64, err error)
+	GetItems(ctx context.Context, req model.FilterItem) (res []model.Item, err error)
 }
 
 type Server struct {

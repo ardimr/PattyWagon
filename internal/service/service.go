@@ -33,6 +33,7 @@ type Repository interface {
 	MerchantExists(ctx context.Context, merchantID int64) (res bool, err error)
 
 	CreateItems(ctx context.Context, item model.Item) (int64, error)
+	GetItems(ctx context.Context, filter model.FilterItem) (res []model.Item, err error)
 }
 
 type Storage interface {

@@ -70,5 +70,19 @@ type Meta struct {
 }
 
 type CreateItemResponse struct {
-	itemID string `json:"itemId"`
+	ItemID string `json:"itemId"`
+}
+
+type GetItemsResponse struct {
+	Data []DetailItem `json:"data"`
+	Meta Meta         `json:"meta"`
+}
+
+type DetailItem struct {
+	ItemID          string  `json:"itemId"`
+	Name            string  `json:"name"`
+	ProductCategory string  `json:"productCategory"`
+	Price           float64 `json:"price"`
+	ImageURL        string  `json:"imageUrl"`
+	CreatedAt       string  `json:"createdAt"`
 }
