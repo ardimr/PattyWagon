@@ -39,9 +39,9 @@ func (s *Service) FindCellIDByResolution(ctx context.Context, location model.Loc
 	}, nil
 }
 
-func (s *Service) FindKRingCellIDs(ctx context.Context, location model.Location, k int) ([]model.Cell, error) {
+func (s *Service) FindKRingCellIDs(ctx context.Context, location model.Location, resolution, k int) ([]model.Cell, error) {
 	latLng := h3.NewLatLng(location.Lat, location.Long)
-	centerCell, err := h3.LatLngToCell(latLng, 0)
+	centerCell, err := h3.LatLngToCell(latLng, resolution)
 	if err != nil {
 		return nil, err
 	}

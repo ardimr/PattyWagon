@@ -149,99 +149,203 @@ func TestService_FindKRingCellIDs(t *testing.T) {
 	s := &Service{}
 	ctx := context.Background()
 
-	t.Run("k=0 returns only center cell", func(t *testing.T) {
-		location := model.Location{Lat: -6.2088, Long: 106.8456}
+	t.Run("successful k-ring generation with k=0", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := 9
+		k := 0
 
-		cells, err := s.FindKRingCellIDs(ctx, location, 0)
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
 
 		require.NoError(t, err)
-		assert.Len(t, cells, 1, "k=0 should return only the center cell")
-		assert.Equal(t, 0, cells[0].Resolution)
+		assert.NotEmpty(t, cells)
+		assert.Len(t, cells, 1) // k=0 should return only center cell
+		assert.Equal(t, resolution, cells[0].Resolution)
 	})
 
-	t.Run("k=1 returns center and immediate neighbors", func(t *testing.T) {
-		location := model.Location{Lat: 0.0, Long: 0.0}
+	t.Run("successful k-ring generation with k=1", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := 9
+		k := 1
 
-		cells, err := s.FindKRingCellIDs(ctx, location, 1)
-
-		require.NoError(t, err)
-		assert.Greater(t, len(cells), 1, "k=1 should return center plus neighbors")
-		// Typically 7 cells for k=1 (1 center + 6 neighbors in hexagon)
-		assert.LessOrEqual(t, len(cells), 7)
-	})
-
-	t.Run("k=2 returns larger ring", func(t *testing.T) {
-		location := model.Location{Lat: 37.7749, Long: -122.4194}
-
-		cells, err := s.FindKRingCellIDs(ctx, location, 2)
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
 
 		require.NoError(t, err)
-		assert.Greater(t, len(cells), 7, "k=2 should return more cells than k=1")
-		// Typically 19 cells for k=2
-		assert.LessOrEqual(t, len(cells), 19)
-	})
+		assert.NotEmpty(t, cells)
+		assert.Len(t, cells, 7) // k=1 returns 7 hexagons (1 center + 6 neighbors)
 
-	t.Run("all cells have same resolution", func(t *testing.T) {
-		location := model.Location{Lat: 40.7128, Long: -74.0060}
-
-		cells, err := s.FindKRingCellIDs(ctx, location, 1)
-
-		require.NoError(t, err)
-		require.Greater(t, len(cells), 0)
-
-		expectedResolution := cells[0].Resolution
 		for _, cell := range cells {
-			assert.Equal(t, expectedResolution, cell.Resolution, "all cells should have same resolution")
+			assert.Equal(t, resolution, cell.Resolution)
+			assert.NotZero(t, cell.CellID)
 		}
 	})
 
-	t.Run("larger k returns more cells", func(t *testing.T) {
-		location := model.Location{Lat: 51.5074, Long: -0.1278}
+	t.Run("successful k-ring generation with k=2", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := 9
+		k := 2
 
-		cells1, err1 := s.FindKRingCellIDs(ctx, location, 1)
-		cells2, err2 := s.FindKRingCellIDs(ctx, location, 2)
-		cells3, err3 := s.FindKRingCellIDs(ctx, location, 3)
-
-		require.NoError(t, err1)
-		require.NoError(t, err2)
-		require.NoError(t, err3)
-
-		assert.Less(t, len(cells1), len(cells2), "k=2 should return more cells than k=1")
-		assert.Less(t, len(cells2), len(cells3), "k=3 should return more cells than k=2")
-	})
-
-	t.Run("all cell IDs are unique", func(t *testing.T) {
-		location := model.Location{Lat: -6.2088, Long: 106.8456}
-
-		cells, err := s.FindKRingCellIDs(ctx, location, 2)
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
 
 		require.NoError(t, err)
+		assert.NotEmpty(t, cells)
+		assert.Len(t, cells, 19) // k=2 returns 19 hexagons
 
-		cellIDMap := make(map[int64]bool)
 		for _, cell := range cells {
-			assert.False(t, cellIDMap[cell.CellID], "cell ID should be unique: %d", cell.CellID)
-			cellIDMap[cell.CellID] = true
+			assert.Equal(t, resolution, cell.Resolution)
+			assert.NotZero(t, cell.CellID)
 		}
 	})
 
-	t.Run("center cell is included in results", func(t *testing.T) {
-		location := model.Location{Lat: 35.6762, Long: 139.6503}
+	t.Run("different resolutions produce different cell counts", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		k := 1
 
-		cells, err := s.FindKRingCellIDs(ctx, location, 2)
+		cells7, err := s.FindKRingCellIDs(ctx, location, 7, k)
+		require.NoError(t, err)
+
+		cells10, err := s.FindKRingCellIDs(ctx, location, 10, k)
+		require.NoError(t, err)
+
+		// Both should have same number of cells for same k
+		assert.Len(t, cells7, 7)
+		assert.Len(t, cells10, 7)
+
+		// But different resolutions
+		assert.Equal(t, 7, cells7[0].Resolution)
+		assert.Equal(t, 10, cells10[0].Resolution)
+	})
+
+	t.Run("location at north pole", func(t *testing.T) {
+		location := model.Location{
+			Lat:  89.9,
+			Long: 0,
+		}
+		resolution := 5
+		k := 1
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, cells)
+	})
+
+	t.Run("location at south pole", func(t *testing.T) {
+		location := model.Location{
+			Lat:  -89.9,
+			Long: 0,
+		}
+		resolution := 5
+		k := 1
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, cells)
+	})
+
+	t.Run("location crossing dateline", func(t *testing.T) {
+		location := model.Location{
+			Lat:  0,
+			Long: 179.9,
+		}
+		resolution := 6
+		k := 1
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, cells)
+		assert.Len(t, cells, 7)
+	})
+
+	t.Run("invalid resolution - too low", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := -1
+		k := 1
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		assert.Error(t, err)
+		assert.Nil(t, cells)
+	})
+
+	t.Run("invalid resolution - too high", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := 16
+		k := 1
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		assert.Error(t, err)
+		assert.Nil(t, cells)
+	})
+
+	t.Run("zero location (null island)", func(t *testing.T) {
+		location := model.Location{
+			Lat:  0,
+			Long: 0,
+		}
+		resolution := 9
+		k := 1
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, cells)
+		assert.Len(t, cells, 7)
+	})
+
+	t.Run("verify cell IDs are unique", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := 9
+		k := 2
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
 
 		require.NoError(t, err)
 
-		// Get the expected center cell
-		latLng := h3.NewLatLng(location.Lat, location.Long)
-		expectedCenter, _ := h3.LatLngToCell(latLng, 0)
-
-		found := false
+		cellIDs := make(map[int64]bool)
 		for _, cell := range cells {
-			if cell.CellID == int64(expectedCenter) {
-				found = true
-				break
-			}
+			assert.False(t, cellIDs[cell.CellID], "duplicate cell ID found")
+			cellIDs[cell.CellID] = true
 		}
-		assert.True(t, found, "center cell should be included in results")
+	})
+
+	t.Run("large k value", func(t *testing.T) {
+		location := model.Location{
+			Lat:  37.7749,
+			Long: -122.4194,
+		}
+		resolution := 7
+		k := 10
+
+		cells, err := s.FindKRingCellIDs(ctx, location, resolution, k)
+
+		require.NoError(t, err)
+		assert.NotEmpty(t, cells)
+		// k=10 should return 331 cells (3k^2 + 3k + 1)
+		expectedCount := 3*k*k + 3*k + 1
+		assert.Len(t, cells, expectedCount)
 	})
 }
