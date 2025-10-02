@@ -36,13 +36,14 @@ func VerifyPassword(password, hash string) bool {
 }
 
 // GenerateToken generate jwt token with userID information
-func GenerateToken(userID int64) (string, error) {
+func GenerateToken(userID int64, role string) (string, error) {
 	claims := model.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 			Issuer:    "PattyWagon",
 		},
 		UserID: userID,
+		Role:   role,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(jwtSignatureKey))
@@ -53,7 +54,7 @@ func GenerateToken(userID int64) (string, error) {
 }
 
 // ParseUserIDFromToken verify jwt token and get user ID information
-func ParseUserIDFromToken(tokenString string) (int64, error) {
+func ParseUserIDandRoleFromToken(tokenString string) (int64, string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &model.Claims{}, func(token *jwt.Token) (any, error) {
 		return []byte(jwtSignatureKey), nil
 	})
@@ -64,5 +65,5 @@ func ParseUserIDFromToken(tokenString string) (int64, error) {
 	if !ok || claims.UserID == 0 {
 		return 0, err
 	}
-	return claims.UserID, nil
+	return claims.UserID, claims.Role nil
 }
