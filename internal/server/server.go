@@ -2,6 +2,7 @@ package server
 
 import (
 	"PattyWagon/internal/model"
+	"PattyWagon/internal/types"
 	"context"
 	"fmt"
 	"io"
@@ -22,6 +23,22 @@ type Service interface {
 	IsUserExist(ctx context.Context, userID int64) (bool, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
+
+	GetOrder(ctx context.Context, orderID int64) (model.Order, error)
+	GetOrderDetail(ctx context.Context, orderDetailID int64) (model.OrderDetail, error)
+	AddItemToCart(ctx context.Context, userID, merchantID, itemID int64, quantity int32) (model.OrderDetail, error)
+	CreateUnpurchasedOrder(ctx context.Context, userID int64) (model.Order, error)
+	GetPurchasedOrdersPagination(ctx context.Context, userID int64, limit, offset int) ([]model.Order, error)
+	UpdateOrderToPurchased(ctx context.Context, orderID int64) error
+
+	GetMerchant(ctx context.Context, merchantID int64) (model.Merchant, error)
+	GetItem(ctx context.Context, itemID int64) (model.Item, error)
+
+	FindOptimalRoute(ctx context.Context, startLat, startLon, userLat, userLon float64, merchantIDs []int64) (types.RouteResult, error)
+	CalculateEstimatedDeliveryTime(ctx context.Context, route types.RouteResult) (float64, error)
+
+	CreateOrderEstimation(ctx context.Context, req model.EstimationRequest) (model.EstimationResponse, error)
+	GetMerchantItemDataConcurrently(ctx context.Context, items []model.EstimationRequestItem) ([]model.MerchantItemData, error)
 }
 
 type Server struct {

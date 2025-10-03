@@ -61,13 +61,13 @@ func (s *Service) UploadFile(ctx context.Context, file io.Reader, filename strin
 	remotePath := fmt.Sprintf("%s_%s", identifier, filename)
 	uri, err := s.storage.UploadFile(ctx, bucket, tempFile.Name(), remotePath)
 	if err != nil {
-		return result, fmt.Errorf("error uploading original file: %w", err)
+		return result, constants.WrapError(constants.ErrErrorUploadingOriginalFile, err)
 	}
 
 	thumbnailName := filepath.Base(thumbnailPath)
 	thumbnailUri, err := s.storage.UploadFile(ctx, bucket, thumbnailPath, thumbnailName)
 	if err != nil {
-		return result, fmt.Errorf("error uploading compressed file: %w", err)
+		return result, constants.WrapError(constants.ErrErrorUploadingCompressedFile, err)
 	}
 
 	thumbailSize, err := utils.GetFileSizeInBytes(thumbnailPath)
@@ -81,7 +81,7 @@ func (s *Service) UploadFile(ctx context.Context, file io.Reader, filename strin
 	})
 
 	if err != nil {
-		return result, fmt.Errorf("error inserting file to database: %w", err)
+		return result, constants.WrapError(constants.ErrErrorInsertingFileToDatabase, err)
 	}
 
 	log.Printf("original (%d): %s | compressed (%d): %s", sizeInBytes, uri, thumbailSize, thumbnailUri)
