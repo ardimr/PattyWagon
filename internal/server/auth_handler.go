@@ -11,9 +11,17 @@ import (
 	"net/http"
 )
 
-func (s *Server) emailLoginHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) adminLoginHandler(w http.ResponseWriter, r *http.Request) {
+	s.loginHandler(w, r, 0) // 0 for admin
+}
+
+func (s *Server) userLoginHandler(w http.ResponseWriter, r *http.Request) {
+	s.loginHandler(w, r, 1) // 1 for user
+}
+
+func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request, role int16) {
 	ctx := r.Context()
-	var req EmailLoginRequest
+	var req LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Println("invalid login request")
@@ -28,32 +36,34 @@ func (s *Server) emailLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, phone, err := s.service.EmailLogin(ctx, req.Email, req.Password)
+	token, err := s.service.UsernameLogin(ctx, req.Username, req.Password, role)
 	if err != nil {
 		log.Printf("failed to login: %s\n", err.Error())
-		if errors.Is(err, constants.ErrUserNotFound) {
-			sendErrorResponse(w, http.StatusNotFound, fmt.Sprintf("email %s not found", req.Email))
-			return
-		}
-		if errors.Is(err, constants.ErrUserWrongPassword) {
-			sendErrorResponse(w, http.StatusBadRequest, "wrong password")
-			return
-		}
+		// if errors.Is(err, constants.ErrUserWrongPassword) {
+		// 	sendErrorResponse(w, http.StatusBadRequest, "wrong password")
+		// 	return
+		// }
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	resp := LoginResponse{
-		Email: req.Email,
-		Phone: phone,
 		Token: token,
 	}
 	sendResponse(w, http.StatusOK, resp)
 }
 
-func (s *Server) emailRegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) adminRegisterHandler(w http.ResponseWriter, r *http.Request) {
+	s.registerHandler(w, r, 0) // 0 for admin
+}
+
+func (s *Server) userRegisterHandler(w http.ResponseWriter, r *http.Request) {
+	s.registerHandler(w, r, 1) // 1 for user
+}
+
+func (s *Server) registerHandler(w http.ResponseWriter, r *http.Request, role int16) {
 	ctx := r.Context()
-	var req EmailRegisterRequest
+	var req RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Println("invalid login request")
@@ -73,8 +83,13 @@ func (s *Server) emailRegisterHandler(w http.ResponseWriter, r *http.Request) {
 			String: req.Email,
 			Valid:  true,
 		},
+		Username: sql.NullString{
+			String: req.Username,
+			Valid:  true,
+		},
+		Role: role,
 	}
-	token, err := s.service.Register(ctx, user, req.Password)
+	token, err := s.service.Register(ctx, user, req.Password, role)
 	if err != nil {
 		log.Printf("failed to register: %s\n", err.Error())
 		if errors.Is(err, constants.ErrDuplicate) {
@@ -86,7 +101,6 @@ func (s *Server) emailRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := RegisterResponse{
-		Email: req.Email,
 		Token: token,
 	}
 	sendResponse(w, http.StatusCreated, resp)

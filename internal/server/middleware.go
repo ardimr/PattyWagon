@@ -52,14 +52,14 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		}
 
 		if role == 1 {
-			for _, pattern := range adminPaths {
+			for pattern, _ := range adminPaths {
 				if pathMatchesPattern(pattern, path) {
 					sendErrorResponse(w, http.StatusUnauthorized, "Unauthorized User")
 					return
 				}
 			}
 		} else if role == 0 {
-			for _, pattern := range userPaths {
+			for pattern, _ := range userPaths {
 				if pathMatchesPattern(pattern, path) {
 					sendErrorResponse(w, http.StatusUnauthorized, "Unauthorized Admin")
 					return
