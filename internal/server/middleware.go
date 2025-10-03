@@ -13,8 +13,8 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		"/health":         true,
 		"/admin/register": true,
 		"/admin/login":    true,
-		"/user/register":  true,
-		"/user/login":     true,
+		"/users/register": true,
+		"/users/login":    true,
 	}
 
 	userPaths := map[string]bool{
