@@ -36,7 +36,7 @@ func VerifyPassword(password, hash string) bool {
 }
 
 // GenerateToken generate jwt token with userID information
-func GenerateToken(userID int64, role string) (string, error) {
+func GenerateToken(userID int64, role int16) (string, error) {
 	claims := model.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
@@ -54,16 +54,16 @@ func GenerateToken(userID int64, role string) (string, error) {
 }
 
 // ParseUserIDFromToken verify jwt token and get user ID information
-func ParseUserIDandRoleFromToken(tokenString string) (int64, string, error) {
+func ParseUserIDandRoleFromToken(tokenString string) (int64, int16, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &model.Claims{}, func(token *jwt.Token) (any, error) {
 		return []byte(jwtSignatureKey), nil
 	})
 	if err != nil {
-		return 0, err
+		return 0, 9, err
 	}
 	claims, ok := token.Claims.(*model.Claims)
 	if !ok || claims.UserID == 0 {
-		return 0, err
+		return 0, 9, err
 	}
-	return claims.UserID, claims.Role nil
+	return claims.UserID, claims.Role, nil
 }
