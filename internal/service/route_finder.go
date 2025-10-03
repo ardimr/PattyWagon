@@ -1,14 +1,104 @@
-package server
+package service
 
 import (
-	"fmt"
+	"PattyWagon/internal/constants"
+	"PattyWagon/internal/types"
+	"context"
 	"math"
+	"sync"
 )
 
 type Location struct {
 	Name string
 	Lat  float64
 	Lon  float64
+}
+
+type merchantResult struct {
+	location Location
+	err      error
+	index    int
+}
+
+func (s *Service) FindOptimalRoute(ctx context.Context, startLat, startLon, userLat, userLon float64, merchantIDs []int64) (types.RouteResult, error) {
+	// Create start and user locations
+	startLocation := Location{
+		Name: "Start",
+		Lat:  startLat,
+		Lon:  startLon,
+	}
+
+	userLocation := Location{
+		Name: "User",
+		Lat:  userLat,
+		Lon:  userLon,
+	}
+
+	merchantLocations, err := s.getMerchantsLocationsConurrently(ctx, merchantIDs)
+	if err != nil {
+		return types.RouteResult{}, err
+	}
+
+	// Solve TSP to find optimal route
+	result := solveTSP(startLocation, userLocation, merchantLocations)
+
+	return result, nil
+}
+
+func (s *Service) CalculateEstimatedDeliveryTime(ctx context.Context, route types.RouteResult) (float64, error) {
+	// The delivery time is already calculated in the RouteResult
+	return route.DeliveryTime, nil
+}
+
+func (s *Service) getMerchantsLocationsConurrently(ctx context.Context, merchantIDs []int64) ([]Location, error) {
+	if len(merchantIDs) == 0 {
+		return []Location{}, nil
+	}
+
+	resultChan := make(chan merchantResult, len(merchantIDs))
+
+	var wg sync.WaitGroup
+	for i, merchantID := range merchantIDs {
+		wg.Add(1)
+		go func(index int, id int64) {
+			defer wg.Done()
+
+			merchant, err := s.GetMerchant(ctx, id)
+			if err != nil {
+				resultChan <- merchantResult{
+					err:   err,
+					index: index,
+				}
+				return
+			}
+
+			location := Location{
+				Name: merchant.Name,
+				Lat:  merchant.Latitude,
+				Lon:  merchant.Longitude,
+			}
+
+			resultChan <- merchantResult{
+				location: location,
+				index:    index,
+			}
+		}(i, merchantID)
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	merchantLocations := make([]Location, len(merchantIDs))
+	for result := range resultChan {
+		if result.err != nil {
+			return nil, constants.WrapError(constants.ErrFailedToGetMerchant, result.err)
+		}
+		merchantLocations[result.index] = result.location
+	}
+
+	return merchantLocations, nil
 }
 
 func haversine(lat1, lon1, lat2, lon2 float64) float64 {
@@ -41,7 +131,6 @@ func toDistanceGraph(locations []Location) map[string]map[string]float64 {
 	return graph
 }
 
-// generate permutations of merchant
 func permutations(arr []string) [][]string {
 	var helper func([]string, int)
 	res := [][]string{}
@@ -64,21 +153,10 @@ func permutations(arr []string) [][]string {
 	return res
 }
 
-// func BruteForce(startLocation, userLocation Location, merchantLocation []Location) {
-func BruteForce() {
-	startLocation := Location{"Merchant Start", 22.1234, 12.5678}
-	userLocation := Location{"user x", 22.1234, -11.5678}
-
-	merchantLocation := []Location{
-		{"Merchant A", 40.7128, -74.0060},
-		{"Merchant B", 37.1234, -122.6543},
-		{"Merchant C", -12.8756, 45.1234},
-		{"Merchant D", 51.5076, -0.1227},
-	}
-
+func solveTSP(startLocation, userLocation Location, merchantLocations []Location) types.RouteResult {
 	var merchant []string
 	locations := []Location{startLocation}
-	for _, loc := range merchantLocation {
+	for _, loc := range merchantLocations {
 		locations = append(locations, loc)
 		merchant = append(merchant, loc.Name)
 	}
@@ -107,7 +185,6 @@ func BruteForce() {
 		}
 
 		// Add start merchant
-
 		first := perm[0]
 		if c, ok := graphDistance[start][first]; ok && valid {
 			cost += c
@@ -128,12 +205,14 @@ func BruteForce() {
 			bestPath = append([]string{}, start)
 			bestPath = append(bestPath, perm...)
 			bestPath = append(bestPath, destination)
-
 		}
 	}
 
-	DeliveryTime := minCost / 2400.0
-	fmt.Println(bestPath)
-	fmt.Println(minCost)
-	fmt.Println(DeliveryTime)
+	deliveryTime := minCost / 2400.0
+
+	return types.RouteResult{
+		Path:         bestPath,
+		TotalCost:    minCost,
+		DeliveryTime: deliveryTime,
+	}
 }
