@@ -12,7 +12,7 @@ type Merchant struct {
 }
 
 type ListMerchantWithItemParams struct {
-	Cell Cell
+	Cell *Cell
 	MerchantParams
 }
 

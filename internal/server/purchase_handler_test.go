@@ -8,6 +8,7 @@ import (
 	"PattyWagon/internal/model"
 	"PattyWagon/internal/service"
 	"PattyWagon/internal/storage"
+	"PattyWagon/internal/utils"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -69,16 +70,50 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 		Price: 10,
 	}
 
-	validItems := []model.Item{
-		{ID: 1, Price: 10, Name: "Bakso"},
-		{ID: 2, Price: 15, Name: "Mie Ayam"},
+	// Generate merchants with different locations and IDs
+	merchants := []model.Merchant{
+		{ID: 1, Name: "Warung Sate Pak Budi", Location: model.Location{Lat: 6.1753, Long: 106.8271}, MerchantCategory: "Street Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 2, Name: "Bakso Malang Enak", Location: model.Location{Lat: 6.1760, Long: 106.8280}, MerchantCategory: "Restaurant", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 3, Name: "Nasi Gudeg Bu Sri", Location: model.Location{Lat: 6.1745, Long: 106.8265}, MerchantCategory: "Traditional Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 4, Name: "Cafe Kopi Hitam", Location: model.Location{Lat: 6.1770, Long: 106.8290}, MerchantCategory: "Cafe", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 5, Name: "Mie Ayam Pak Tarno", Location: model.Location{Lat: 6.1740, Long: 106.8260}, MerchantCategory: "Street Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 6, Name: "Seafood Bu Inem", Location: model.Location{Lat: 6.1780, Long: 106.8300}, MerchantCategory: "Seafood", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 7, Name: "Pizza Corner", Location: model.Location{Lat: 6.1765, Long: 106.8275}, MerchantCategory: "Fast Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 8, Name: "Sushi Zen", Location: model.Location{Lat: 6.1755, Long: 106.8285}, MerchantCategory: "Japanese", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 9, Name: "Burger Joint", Location: model.Location{Lat: 6.1750, Long: 106.8270}, MerchantCategory: "Fast Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 10, Name: "Taco Fiesta", Location: model.Location{Lat: 6.1775, Long: 106.8295}, MerchantCategory: "Mexican", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 11, Name: "Dim Sum Palace", Location: model.Location{Lat: 6.1748, Long: 106.8268}, MerchantCategory: "Chinese", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 12, Name: "Pasta Italia", Location: model.Location{Lat: 6.1772, Long: 106.8292}, MerchantCategory: "Italian", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 13, Name: "Roti Bakar 88", Location: model.Location{Lat: 6.1742, Long: 106.8262}, MerchantCategory: "Bakery", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 14, Name: "Ayam Geprek Bensu", Location: model.Location{Lat: 6.1778, Long: 106.8298}, MerchantCategory: "Indonesian", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 15, Name: "Smoothie Bar", Location: model.Location{Lat: 6.1758, Long: 106.8278}, MerchantCategory: "Beverages", ImageUrl: "http://minio", CreatedAt: time.Now()},
 	}
-	validMerchantWithItems := []model.MerchantItem{
-		{Merchant: validMerchant, Items: validItems},
-		{Merchant: validMerchant, Items: validItems},
-		{Merchant: validMerchant, Items: validItems},
-		{Merchant: validMerchant, Items: validItems},
-		{Merchant: validMerchant, Items: validItems},
+
+	// Generate items for each merchant
+	itemSets := [][]model.Item{
+		{{ID: 1, Price: 12000, Name: "Sate Ayam"}, {ID: 2, Price: 15000, Name: "Sate Kambing"}},
+		{{ID: 3, Price: 8000, Name: "Bakso Urat"}, {ID: 4, Price: 10000, Name: "Bakso Jumbo"}},
+		{{ID: 5, Price: 18000, Name: "Gudeg Komplit"}, {ID: 6, Price: 12000, Name: "Gudeg Ayam"}},
+		{{ID: 7, Price: 25000, Name: "Cappuccino"}, {ID: 8, Price: 30000, Name: "Latte"}},
+		{{ID: 9, Price: 9000, Name: "Mie Ayam Biasa"}, {ID: 10, Price: 12000, Name: "Mie Ayam Bakso"}},
+		{{ID: 11, Price: 35000, Name: "Udang Bakar"}, {ID: 12, Price: 40000, Name: "Ikan Gurame"}},
+		{{ID: 13, Price: 45000, Name: "Pizza Margherita"}, {ID: 14, Price: 55000, Name: "Pizza Pepperoni"}},
+		{{ID: 15, Price: 38000, Name: "Salmon Roll"}, {ID: 16, Price: 42000, Name: "Tuna Sashimi"}},
+		{{ID: 17, Price: 22000, Name: "Cheese Burger"}, {ID: 18, Price: 25000, Name: "Beef Burger"}},
+		{{ID: 19, Price: 28000, Name: "Beef Tacos"}, {ID: 20, Price: 24000, Name: "Chicken Tacos"}},
+		{{ID: 21, Price: 32000, Name: "Har Gow"}, {ID: 22, Price: 30000, Name: "Siu Mai"}},
+		{{ID: 23, Price: 48000, Name: "Spaghetti Carbonara"}, {ID: 24, Price: 52000, Name: "Fettuccine Alfredo"}},
+		{{ID: 25, Price: 15000, Name: "Roti Bakar Coklat"}, {ID: 26, Price: 18000, Name: "Roti Bakar Keju"}},
+		{{ID: 27, Price: 16000, Name: "Ayam Geprek Sambal Ijo"}, {ID: 28, Price: 14000, Name: "Ayam Geprek Original"}},
+		{{ID: 29, Price: 20000, Name: "Mango Smoothie"}, {ID: 30, Price: 22000, Name: "Berry Smoothie"}},
+	}
+
+	validMerchantWithItems := make([]model.MerchantItem, len(merchants))
+	for i, merchant := range merchants {
+		validMerchantWithItems[i] = model.MerchantItem{
+			Merchant: merchant,
+			Items:    itemSets[i],
+		}
 	}
 
 	repo.Mock.On("GetMerchantByID", mock.Anything, int64(1)).Return(validMerchant, nil)
@@ -105,6 +140,33 @@ func testPopulateMockLocationService(t *testing.T, svc *mocklocationservice.Mock
 
 	svc.Mock.On("EstimateDeliveryTimeInMinutes", mock.Anything, mock.Anything).Return(int64(25), nil)
 	svc.Mock.On("FindNearby", mock.Anything, mock.Anything, mock.Anything).Return(neigbhors, nil)
+	svc.Mock.On("FindCellIDByResolution", mock.Anything, mock.Anything, mock.Anything).Return(model.Cell{CellID: 1, Resolution: 8}, nil)
+	svc.Mock.On("FindKRingCellIDs", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(neigbhors, nil)
+}
+
+// utils.CalculateDistance calculates distance between two points using Haversine formula
+
+func validateMerchantsOrderedByDistance(t *testing.T, userLat, userLon float64, merchants []MerchantWithItem) {
+	t.Helper()
+
+	if len(merchants) <= 1 {
+		return
+	}
+
+	var prevDistance float64 = -1
+	for i, merchant := range merchants {
+		distance := utils.CalculateDistance(userLat, userLon, merchant.Merchant.Location.Lat, merchant.Merchant.Location.Long)
+
+		if prevDistance >= 0 {
+			assert.LessOrEqual(t, prevDistance, distance,
+				"Merchant %d (%s) at distance %.2fm should not come before merchant %d (%s) at distance %.2fm",
+				i-1, merchants[i-1].Merchant.Name, prevDistance,
+				i, merchant.Merchant.Name, distance)
+		}
+
+		prevDistance = distance
+		t.Logf("Merchant %d: %s - Distance: %.2f meters", i, merchant.Merchant.Name, distance)
+	}
 }
 
 func TestEstimateOrderPrice(t *testing.T) {
@@ -315,18 +377,13 @@ func TestEstimateOrderPrice(t *testing.T) {
 func TestGetNearbyMerchants(t *testing.T) {
 	s := testPurchaseSetup(t)
 
-	filter := FindNearbyMerchantRequest{}
-
 	userLocation := LocationRequest{
 		Lat:  6.1674,
 		Long: 106.8209,
 	}
 
-	t.Run("Valid", func(t *testing.T) {
-		reqBody, err := json.Marshal(filter)
-		assert.Nil(t, err)
-
-		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby", bytes.NewBuffer(reqBody))
+	t.Run("Valid_DistanceOrdering", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby", nil)
 		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
 		w := httptest.NewRecorder()
 
@@ -334,6 +391,91 @@ func TestGetNearbyMerchants(t *testing.T) {
 
 		resp := w.Result()
 		assert.Equal(t, 200, resp.StatusCode)
-		fmt.Printf("Response Body: %v\n", w.Body.String())
+
+		// Parse response and validate distance ordering
+		var response FindNearbyMerchantsResponse
+		err := json.NewDecoder(w.Body).Decode(&response)
+		assert.NoError(t, err)
+
+		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
+		assert.NotEmpty(t, response.Data, "Should return merchants")
+	})
+
+	t.Run("ValidWithPagination_DistanceOrdering", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?limit=3&offset=1", nil)
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 200, resp.StatusCode)
+
+		// Parse response and validate distance ordering
+		var response FindNearbyMerchantsResponse
+		err := json.NewDecoder(w.Body).Decode(&response)
+		assert.NoError(t, err)
+
+		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
+		assert.LessOrEqual(t, len(response.Data), 3, "Should respect limit parameter")
+	})
+
+	t.Run("EdgeCase_OffsetGreaterThanTotal", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?limit=10&offset=100", nil)
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 200, resp.StatusCode)
+
+		// Parse response - should return all merchants when offset exceeds total
+		var response FindNearbyMerchantsResponse
+		err := json.NewDecoder(w.Body).Decode(&response)
+		assert.NoError(t, err)
+
+		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
+		assert.NotEmpty(t, response.Data, "Should return all merchants when offset > total")
+	})
+
+	t.Run("EdgeCase_LimitExceedsRemaining", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?limit=100&offset=3", nil)
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 200, resp.StatusCode)
+
+		// Parse response and validate distance ordering
+		var response FindNearbyMerchantsResponse
+		err := json.NewDecoder(w.Body).Decode(&response)
+		assert.NoError(t, err)
+
+		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
+	})
+
+	t.Run("InvalidCoordinate", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby", nil)
+		req.SetPathValue("coordinate", "invalid")
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 400, resp.StatusCode)
+	})
+
+	t.Run("MethodNotAllowed", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/v1/merchants/nearby", nil)
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 405, resp.StatusCode)
 	})
 }

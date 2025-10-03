@@ -31,7 +31,7 @@ func (m *MockLocationService) FindCellIDByResolution(ctx context.Context, locati
 	return args.Get(0).(model.Cell), args.Error(1)
 }
 
-func (m *MockLocationService) FindKRingCellIDs(ctx context.Context, location model.Location, k int) ([]model.Cell, error) {
-	args := m.Called(ctx, location, k)
+func (m *MockLocationService) FindKRingCellIDs(ctx context.Context, location model.Location, resolution, k int) ([]model.Cell, error) {
+	args := m.Called(ctx, location, resolution, k)
 	return args.Get(0).([]model.Cell), args.Error(1)
 }
