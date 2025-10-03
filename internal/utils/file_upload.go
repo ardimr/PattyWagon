@@ -27,3 +27,15 @@ func GetFileSizeInBytes(filename string) (int64, error) {
 
 	return fileSize, nil
 }
+
+func ValidateFileSize(sizeInBytes int64) error {
+	if sizeInBytes > constants.MaxUploadSizeInBytes {
+		return fmt.Errorf("exceed max size: %v", sizeInBytes)
+	}
+
+	if sizeInBytes < constants.MinUploadSizeInBytes {
+		return fmt.Errorf("less than min size: %v", sizeInBytes)
+	}
+
+	return nil
+}
