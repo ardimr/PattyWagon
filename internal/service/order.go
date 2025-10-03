@@ -30,8 +30,6 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 		return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToBeginTransaction, err)
 	}
 
-	txRepo := s.repository.WithTx(tx).(TxRepository)
-
 	defer func() {
 		if err != nil {
 			tx.Rollback()
@@ -48,10 +46,10 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 		return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToGetItem, err)
 	}
 
-	order, err := txRepo.GetUnpurchasedOrderByUserID(ctx, userID)
+	order, err := s.repository.GetUnpurchasedOrderByUserIDWithTx(ctx, tx, userID)
 	if err != nil {
 		if errors.Is(err, constants.ErrNoUnpurchasedOrder) {
-			order, err = txRepo.CreateOrder(ctx, userID, 0, false)
+			order, err = s.repository.CreateOrderWithTx(ctx, tx, userID, 0, false)
 			if err != nil {
 				return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToCreateUnpurchasedOrder, err)
 			}
@@ -60,10 +58,10 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 		}
 	}
 
-	orderDetail, err := txRepo.GetOrderDetailByOrderIDAndMerchantID(ctx, order.ID, merchantID)
+	orderDetail, err := s.repository.GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx, tx, order.ID, merchantID)
 	if err != nil {
 		if errors.Is(err, constants.ErrOrderDetailNotFound) {
-			orderDetail, err = txRepo.CreateOrderDetail(ctx, order.ID, merchantID, merchant.Name, merchant.Category.String, merchant.ImageURL, merchant.Latitude, merchant.Longitude)
+			orderDetail, err = s.repository.CreateOrderDetailWithTx(ctx, tx, order.ID, merchantID, merchant.Name, merchant.Category.String, merchant.ImageURL, merchant.Latitude, merchant.Longitude)
 			if err != nil {
 				return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToCreateOrderDetail, err)
 			}
@@ -72,7 +70,7 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 		}
 	}
 
-	orderItem, err := txRepo.GetOrderItemByOrderDetailIDAndItemID(ctx, orderDetail.ID, itemID)
+	orderItem, err := s.repository.GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx, tx, orderDetail.ID, itemID)
 	if err != nil {
 		if errors.Is(err, constants.ErrOrderItemNotFound) {
 			pricePerItem := int64(0)
@@ -80,7 +78,7 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 				pricePerItem = item.Price.Int64
 			}
 
-			_, err = txRepo.CreateOrderItem(ctx, orderDetail.ID, itemID, item.Name, item.Category.String, item.FileURI.String, pricePerItem, quantity, pricePerItem*int64(quantity))
+			_, err = s.repository.CreateOrderItemWithTx(ctx, tx, orderDetail.ID, itemID, item.Name, item.Category.String, item.FileURI.String, pricePerItem, quantity, pricePerItem*int64(quantity))
 			if err != nil {
 				return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToCreateOrderItem, err)
 			}
@@ -90,7 +88,7 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 	} else {
 		newQuantity := orderItem.Quantity + quantity
 		newTotalPrice := orderItem.PricePerItem * int64(newQuantity)
-		_, err = txRepo.UpdateOrderItem(ctx, orderItem.ID, orderItem.OrderDetailID, orderItem.ItemName, orderItem.ProductCategory, orderItem.ItemImageURL, orderItem.PricePerItem, newQuantity, newTotalPrice)
+		_, err = s.repository.UpdateOrderItemWithTx(ctx, tx, orderItem.ID, orderItem.OrderDetailID, orderItem.ItemName, orderItem.ProductCategory, orderItem.ItemImageURL, orderItem.PricePerItem, newQuantity, newTotalPrice)
 		if err != nil {
 			return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToUpdateOrderItem, err)
 		}

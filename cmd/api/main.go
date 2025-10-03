@@ -65,10 +65,9 @@ func main() {
 	defer db.Close()
 
 	repo := repository.New(db)
-	txRepo := repository.NewRepository(db)
 	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 25})
 	imageCompressor := imagecompressor.New(imagecompressor.MaxConcurrentCompress, imagecompressor.CompressionQuality)
-	svc := service.New(repo, txRepo, storage, imageCompressor)
+	svc := service.New(repo, storage, imageCompressor)
 	serv := server.NewServer(svc)
 
 	observability.SetupTracer(context.Background(), observability.OtlpEndpoint)

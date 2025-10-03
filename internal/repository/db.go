@@ -26,12 +26,6 @@ type Queries struct {
 	db DBTX
 }
 
-func (q *Queries) WithTx(tx *sql.Tx) *Queries {
-	return &Queries{
-		db: tx,
-	}
-}
-
 func (q *Queries) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
 	// Check if the underlying db can begin a transaction
 	if beginner, ok := q.db.(interface {
@@ -43,9 +37,10 @@ func (q *Queries) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, er
 	return nil, errors.New("cannot begin transaction: already in a transaction")
 }
 
-func (q *Queries) CanBeginTx() bool {
-	_, ok := q.db.(interface {
-		BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
-	})
-	return ok
+// getDB returns the transaction if provided, otherwise returns the default db
+func (q *Queries) getDB(tx *sql.Tx) DBTX {
+	if tx != nil {
+		return tx
+	}
+	return q.db
 }

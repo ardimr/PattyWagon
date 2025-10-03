@@ -26,10 +26,11 @@ const (
 )
 
 // Order methods
-func (q *Queries) CreateOrder(ctx context.Context, userID int64, orderEstimationID int64, isPurchased bool) (model.Order, error) {
+func (q *Queries) CreateOrderWithTx(ctx context.Context, tx *sql.Tx, userID int64, orderEstimationID int64, isPurchased bool) (model.Order, error) {
+	db := q.getDB(tx)
 	query := insertOrderQuery
 	var order model.Order
-	err := q.db.QueryRowContext(ctx, query, userID, orderEstimationID, isPurchased).Scan(
+	err := db.QueryRowContext(ctx, query, userID, orderEstimationID, isPurchased).Scan(
 		&order.ID,
 		&order.CreatedAt,
 		&order.UpdatedAt,
@@ -43,9 +44,14 @@ func (q *Queries) CreateOrder(ctx context.Context, userID int64, orderEstimation
 	return order, nil
 }
 
-func (q *Queries) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
+func (q *Queries) CreateOrder(ctx context.Context, userID int64, orderEstimationID int64, isPurchased bool) (model.Order, error) {
+	return q.CreateOrderWithTx(ctx, nil, userID, orderEstimationID, isPurchased)
+}
+
+func (q *Queries) GetOrderByIDWithTx(ctx context.Context, tx *sql.Tx, id int64) (model.Order, error) {
+	db := q.getDB(tx)
 	query := selectOrderByIdQuery
-	row := q.db.QueryRowContext(ctx, query, id)
+	row := db.QueryRowContext(ctx, query, id)
 	var order model.Order
 	if err := row.Scan(
 		&order.ID,
@@ -63,9 +69,14 @@ func (q *Queries) GetOrderByID(ctx context.Context, id int64) (model.Order, erro
 	return order, nil
 }
 
-func (q *Queries) GetOrderByEstimationID(ctx context.Context, estimationId int64) (model.Order, error) {
+func (q *Queries) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
+	return q.GetOrderByIDWithTx(ctx, nil, id)
+}
+
+func (q *Queries) GetOrderByEstimationIDWithTx(ctx context.Context, tx *sql.Tx, estimationId int64) (model.Order, error) {
+	db := q.getDB(tx)
 	query := selectOrderByOrderEstimationIdQuery
-	row := q.db.QueryRowContext(ctx, query, estimationId)
+	row := db.QueryRowContext(ctx, query, estimationId)
 	var order model.Order
 	if err := row.Scan(
 		&order.ID,
@@ -83,9 +94,10 @@ func (q *Queries) GetOrderByEstimationID(ctx context.Context, estimationId int64
 	return order, nil
 }
 
-func (q *Queries) GetOrdersByUserIDAndPurchased(ctx context.Context, userID int64, isPurchased bool, limit, offset int) ([]model.Order, error) {
+func (q *Queries) GetOrdersByUserIDAndPurchasedWithTx(ctx context.Context, tx *sql.Tx, userID int64, isPurchased bool, limit, offset int) ([]model.Order, error) {
+	db := q.getDB(tx)
 	query := selectOrdersByUserAndPurchased
-	rows, err := q.db.QueryContext(ctx, query, userID, isPurchased, limit, offset)
+	rows, err := db.QueryContext(ctx, query, userID, isPurchased, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -110,9 +122,10 @@ func (q *Queries) GetOrdersByUserIDAndPurchased(ctx context.Context, userID int6
 	return orders, rows.Err()
 }
 
-func (q *Queries) GetUnpurchasedOrderByUserID(ctx context.Context, userID int64) (model.Order, error) {
+func (q *Queries) GetUnpurchasedOrderByUserIDWithTx(ctx context.Context, tx *sql.Tx, userID int64) (model.Order, error) {
+	db := q.getDB(tx)
 	query := selectUnpurchasedOrderByUserID
-	row := q.db.QueryRowContext(ctx, query, userID)
+	row := db.QueryRowContext(ctx, query, userID)
 	var order model.Order
 	if err := row.Scan(
 		&order.ID,
@@ -130,23 +143,25 @@ func (q *Queries) GetUnpurchasedOrderByUserID(ctx context.Context, userID int64)
 	return order, nil
 }
 
-func (q *Queries) UpdateOrder(ctx context.Context, id int64, orderEstimationID int64, isPurchased bool) (model.Order, error) {
+func (q *Queries) UpdateOrderWithTx(ctx context.Context, tx *sql.Tx, id int64, orderEstimationID int64, isPurchased bool) (model.Order, error) {
+	db := q.getDB(tx)
 	query := updateOrderQuery
 	var updatedAt sql.NullTime
-	err := q.db.QueryRowContext(ctx, query, id, orderEstimationID, isPurchased).Scan(&updatedAt)
+	err := db.QueryRowContext(ctx, query, id, orderEstimationID, isPurchased).Scan(&updatedAt)
 	if err != nil {
 		return model.Order{}, err
 	}
 
 	// Get the updated order
-	return q.GetOrderByID(ctx, id)
+	return q.GetOrderByIDWithTx(ctx, tx, id)
 }
 
 // Order Detail methods
-func (q *Queries) CreateOrderDetail(ctx context.Context, orderID, merchantID int64, merchantName, merchantCategory, merchantImageURL string, merchantLatitude, merchantLongitude float64) (model.OrderDetail, error) {
+func (q *Queries) CreateOrderDetailWithTx(ctx context.Context, tx *sql.Tx, orderID, merchantID int64, merchantName, merchantCategory, merchantImageURL string, merchantLatitude, merchantLongitude float64) (model.OrderDetail, error) {
+	db := q.getDB(tx)
 	query := insertOrderDetailQuery
 	var orderDetail model.OrderDetail
-	err := q.db.QueryRowContext(ctx, query, orderID, merchantID, merchantName, merchantCategory, merchantImageURL, merchantLatitude, merchantLongitude).Scan(
+	err := db.QueryRowContext(ctx, query, orderID, merchantID, merchantName, merchantCategory, merchantImageURL, merchantLatitude, merchantLongitude).Scan(
 		&orderDetail.ID,
 		&orderDetail.CreatedAt,
 		&orderDetail.UpdatedAt,
@@ -164,9 +179,10 @@ func (q *Queries) CreateOrderDetail(ctx context.Context, orderID, merchantID int
 	return orderDetail, nil
 }
 
-func (q *Queries) GetOrderDetailByID(ctx context.Context, id int64) (model.OrderDetail, error) {
+func (q *Queries) GetOrderDetailByIDWithTx(ctx context.Context, tx *sql.Tx, id int64) (model.OrderDetail, error) {
+	db := q.getDB(tx)
 	query := selectOrderDetailByIdQuery
-	row := q.db.QueryRowContext(ctx, query, id)
+	row := db.QueryRowContext(ctx, query, id)
 	var orderDetail model.OrderDetail
 	if err := row.Scan(
 		&orderDetail.ID,
@@ -188,9 +204,10 @@ func (q *Queries) GetOrderDetailByID(ctx context.Context, id int64) (model.Order
 	return orderDetail, nil
 }
 
-func (q *Queries) GetOrderDetailByOrderIDAndMerchantID(ctx context.Context, orderID, merchantID int64) (model.OrderDetail, error) {
+func (q *Queries) GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx context.Context, tx *sql.Tx, orderID, merchantID int64) (model.OrderDetail, error) {
+	db := q.getDB(tx)
 	query := selectOrderDetailByOrderMerchant
-	row := q.db.QueryRowContext(ctx, query, orderID, merchantID)
+	row := db.QueryRowContext(ctx, query, orderID, merchantID)
 	var orderDetail model.OrderDetail
 	if err := row.Scan(
 		&orderDetail.ID,
@@ -213,10 +230,11 @@ func (q *Queries) GetOrderDetailByOrderIDAndMerchantID(ctx context.Context, orde
 }
 
 // Order Item methods
-func (q *Queries) CreateOrderItem(ctx context.Context, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+func (q *Queries) CreateOrderItemWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+	db := q.getDB(tx)
 	query := insertOrderItemQuery
 	var orderItem model.OrderItem
-	err := q.db.QueryRowContext(ctx, query, orderDetailID, itemID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice).Scan(
+	err := db.QueryRowContext(ctx, query, orderDetailID, itemID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice).Scan(
 		&orderItem.ID,
 		&orderItem.CreatedAt,
 		&orderItem.UpdatedAt,
@@ -235,9 +253,10 @@ func (q *Queries) CreateOrderItem(ctx context.Context, orderDetailID, itemID int
 	return orderItem, nil
 }
 
-func (q *Queries) GetOrderItemByOrderDetailIDAndItemID(ctx context.Context, orderDetailID, itemID int64) (model.OrderItem, error) {
+func (q *Queries) GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64) (model.OrderItem, error) {
+	db := q.getDB(tx)
 	query := selectOrderItemByDetailAndItem
-	row := q.db.QueryRowContext(ctx, query, orderDetailID, itemID)
+	row := db.QueryRowContext(ctx, query, orderDetailID, itemID)
 	var orderItem model.OrderItem
 	if err := row.Scan(
 		&orderItem.ID,
@@ -260,15 +279,15 @@ func (q *Queries) GetOrderItemByOrderDetailIDAndItemID(ctx context.Context, orde
 	return orderItem, nil
 }
 
-func (q *Queries) UpdateOrderItem(ctx context.Context, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+func (q *Queries) UpdateOrderItemWithTx(ctx context.Context, tx *sql.Tx, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+	db := q.getDB(tx)
 	query := updateOrderItemQuery
 	var updatedAt sql.NullTime
-	err := q.db.QueryRowContext(ctx, query, id, orderDetailID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice).Scan(&updatedAt)
+	err := db.QueryRowContext(ctx, query, id, orderDetailID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice).Scan(&updatedAt)
 	if err != nil {
 		return model.OrderItem{}, err
 	}
 
-	// Return updated order item (we need to get it since we only have the updated timestamp)
 	var orderItem model.OrderItem
 	orderItem.ID = id
 	orderItem.OrderDetailID = orderDetailID
@@ -280,4 +299,46 @@ func (q *Queries) UpdateOrderItem(ctx context.Context, id, orderDetailID int64, 
 	orderItem.TotalPrice = totalPrice
 	orderItem.UpdatedAt = updatedAt.Time
 	return orderItem, nil
+}
+
+// Overload methods without tx parameter
+
+func (q *Queries) GetOrderByEstimationID(ctx context.Context, estimationId int64) (model.Order, error) {
+	return q.GetOrderByEstimationIDWithTx(ctx, nil, estimationId)
+}
+
+func (q *Queries) GetOrdersByUserIDAndPurchased(ctx context.Context, userID int64, isPurchased bool, limit, offset int) ([]model.Order, error) {
+	return q.GetOrdersByUserIDAndPurchasedWithTx(ctx, nil, userID, isPurchased, limit, offset)
+}
+
+func (q *Queries) GetUnpurchasedOrderByUserID(ctx context.Context, userID int64) (model.Order, error) {
+	return q.GetUnpurchasedOrderByUserIDWithTx(ctx, nil, userID)
+}
+
+func (q *Queries) UpdateOrder(ctx context.Context, id int64, orderEstimationID int64, isPurchased bool) (model.Order, error) {
+	return q.UpdateOrderWithTx(ctx, nil, id, orderEstimationID, isPurchased)
+}
+
+func (q *Queries) CreateOrderDetail(ctx context.Context, orderID, merchantID int64, merchantName, merchantCategory, merchantImageURL string, merchantLatitude, merchantLongitude float64) (model.OrderDetail, error) {
+	return q.CreateOrderDetailWithTx(ctx, nil, orderID, merchantID, merchantName, merchantCategory, merchantImageURL, merchantLatitude, merchantLongitude)
+}
+
+func (q *Queries) GetOrderDetailByID(ctx context.Context, id int64) (model.OrderDetail, error) {
+	return q.GetOrderDetailByIDWithTx(ctx, nil, id)
+}
+
+func (q *Queries) GetOrderDetailByOrderIDAndMerchantID(ctx context.Context, orderID, merchantID int64) (model.OrderDetail, error) {
+	return q.GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx, nil, orderID, merchantID)
+}
+
+func (q *Queries) CreateOrderItem(ctx context.Context, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+	return q.CreateOrderItemWithTx(ctx, nil, orderDetailID, itemID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice)
+}
+
+func (q *Queries) GetOrderItemByOrderDetailIDAndItemID(ctx context.Context, orderDetailID, itemID int64) (model.OrderItem, error) {
+	return q.GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx, nil, orderDetailID, itemID)
+}
+
+func (q *Queries) UpdateOrderItem(ctx context.Context, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+	return q.UpdateOrderItemWithTx(ctx, nil, id, orderDetailID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice)
 }
