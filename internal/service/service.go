@@ -27,7 +27,14 @@ type Repository interface {
 	GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error)
 	FileExists(ctx context.Context, fileID string) (bool, error)
 
-	// Product Repository
+	// Merchant Repository
+	InsertMerchant(ctx context.Context, data model.Merchant) (res int64, err error)
+	GetMerchants(ctx context.Context, filter model.FilterMerchant) (res []model.Merchant, err error)
+	MerchantExists(ctx context.Context, merchantID int64) (res bool, err error)
+	BulkInsertMerchantLocations(ctx context.Context, locations []model.MerchantLocation) error
+
+	CreateItems(ctx context.Context, item model.Item) (int64, error)
+	GetItems(ctx context.Context, filter model.FilterItem) (res []model.Item, err error)
 }
 
 type Storage interface {

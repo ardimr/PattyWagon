@@ -1,3 +1,14 @@
 package constants
 
-var ProductTypes = []string{"Food", "Beverage", "Clothes", "Furniture", "Tools"}
+var ProductCategory = map[string]struct{}{
+	"Beverage":   {},
+	"Food":       {},
+	"Snack":      {},
+	"Condiments": {},
+	"Additions":  {},
+}
+
+func IsValidProductCategory(cat string) bool {
+	_, ok := ProductCategory[cat]
+	return ok
+}

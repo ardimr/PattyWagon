@@ -16,6 +16,10 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /users/login", s.userLoginHandler)
 
 	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
+	mux.HandleFunc("POST /admin/merchants", s.createMerchantHandler)
+	mux.HandleFunc("GET /admin/merchants", s.getMerchantHandler)
+	mux.HandleFunc("POST /admin/merchants/{merchantId}/items", s.createItemHandler)
+	mux.HandleFunc("GET /admin/merchants/{merchantId}/items", s.getItemHandler)
 
 	return logger.LoggingMiddleware(s.contentMiddleware(s.authMiddleware(mux)))
 }
