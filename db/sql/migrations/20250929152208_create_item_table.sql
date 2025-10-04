@@ -15,6 +15,7 @@ CREATE TABLE items (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 );
+
 -- +goose StatementEnd
 
 -- +goose Down

@@ -94,7 +94,7 @@ func TestHealthHandler(t *testing.T) {
 func TestEmailLoginHandler_ValidRequest(t *testing.T) {
 	s := testSetup(t)
 
-	loginReq := EmailLoginRequest{
+	loginReq := LoginRequest{
 		Email:    "newuser@example.com",
 		Password: "validpassword123",
 	}
@@ -138,7 +138,7 @@ func TestEmailLoginHandler_InvalidJSON(t *testing.T) {
 func TestEmailRegisterHandler_ValidRequest(t *testing.T) {
 	s := testSetup(t)
 
-	registerReq := EmailRegisterRequest{
+	registerReq := RegisterRequest{
 		Email:    "newuser@example.com",
 		Password: "validpassword123",
 	}
