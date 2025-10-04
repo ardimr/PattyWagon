@@ -31,7 +31,7 @@ func (q *Queries) InsertMerchant(ctx context.Context, data model.Merchant) (res 
 		return 0, fmt.Errorf("error inserting file: %w", err)
 	}
 
-	return
+	return data.ID, nil
 }
 
 func (q *Queries) GetMerchants(ctx context.Context, filter model.FilterMerchant) (res []model.Merchant, err error) {
@@ -131,4 +131,30 @@ func (r *Queries) MerchantExists(ctx context.Context, merchantID int64) (res boo
 	}
 
 	return exists, nil
+}
+
+func (q *Queries) BulkInsertMerchantLocations(ctx context.Context, locations []model.MerchantLocation) error {
+	if len(locations) == 0 {
+		return nil
+	}
+
+	query := `INSERT INTO merchant_locations (merchant_id, h3_index, resolution, created_at, updated_at) VALUES `
+
+	values := []interface{}{}
+	placeholders := []string{}
+
+	for i, loc := range locations {
+		placeholders = append(placeholders,
+			fmt.Sprintf("($%d, $%d, $%d, NOW(), NOW())", i*3+1, i*3+2, i*3+3))
+		values = append(values, loc.MerchantID, loc.H3Index, loc.Resolution)
+	}
+
+	query += strings.Join(placeholders, ", ")
+
+	_, err := q.db.ExecContext(ctx, query, values...)
+	if err != nil {
+		return fmt.Errorf("error bulk inserting merchant locations: %w", err)
+	}
+
+	return nil
 }

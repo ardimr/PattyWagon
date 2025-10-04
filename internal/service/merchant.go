@@ -22,6 +22,25 @@ func (s *Service) CreateMerchant(ctx context.Context, req model.Merchant) (res i
 		return 0, err
 	}
 
+	merchantCells, err := s.locationService.GetAllCellIDs(ctx, model.Location{
+		Lat:  req.Latitude,
+		Long: req.Longitude,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	var merchantLocations []model.MerchantLocation
+	for i := range merchantCells {
+		merchantLocations = append(merchantLocations, model.MerchantLocation{
+			MerchantID: res,
+			H3Index:    merchantCells[i].CellID,
+			Resolution: merchantCells[i].Resolution,
+		})
+	}
+
+	err = s.repository.BulkInsertMerchantLocations(ctx, merchantLocations)
+
 	return res, nil
 }
 
