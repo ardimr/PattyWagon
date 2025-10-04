@@ -8,6 +8,7 @@ import (
 	"context"
 	"os"
 	"slices"
+	"sync"
 )
 
 func (s *Service) FindNearbyMerchants(ctx context.Context, userLocation model.Location, searchParams model.FindNerbyMerchantParams) ([]model.MerchantItem, error) {
@@ -90,6 +91,8 @@ func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation m
 	log.Printf("K-ring: %d ", k)
 
 	var merchants []model.MerchantItem
+	var lock sync.Mutex
+	var wg sync.WaitGroup
 	unseenCells := make([]model.Cell, 0)
 
 	cells, err := s.locationService.FindKRingCellIDs(ctx, userLocation, resolution, k)
@@ -106,6 +109,8 @@ func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation m
 	// log.Printf("unseen cells: %v", unseenCells)
 
 	// TODO: implement concurrent query
+	errCh := make(chan error, len(unseenCells))
+
 	for _, cell := range unseenCells {
 		cellMap[cell.CellID] = cell
 		queryParams := model.ListMerchantWithItemParams{
@@ -113,16 +118,33 @@ func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation m
 			MerchantParams: filter,
 		}
 
-		filteredMerchants, err := s.repository.ListMerchantWithItems(ctx, queryParams)
+		wg.Add(1)
+
+		go func(c model.Cell, params model.ListMerchantWithItemParams) {
+			defer wg.Done()
+			filteredMerchants, err := s.repository.ListMerchantWithItems(ctx, params)
+			if err != nil {
+				errCh <- err
+			}
+
+			lock.Lock()
+			defer lock.Unlock()
+
+			for _, merchant := range filteredMerchants {
+				if _, exists := seenMerchants[merchant.Merchant.ID]; !exists {
+					seenMerchants[merchant.Merchant.ID] = struct{}{}
+					merchants = append(merchants, merchant)
+				}
+			}
+		}(cell, queryParams)
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
 		if err != nil {
 			return nil, err
-		}
-
-		for _, merchant := range filteredMerchants {
-			if _, exists := seenMerchants[merchant.Merchant.ID]; !exists {
-				seenMerchants[merchant.Merchant.ID] = struct{}{}
-				merchants = append(merchants, merchant)
-			}
 		}
 	}
 

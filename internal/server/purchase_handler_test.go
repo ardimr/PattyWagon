@@ -34,7 +34,12 @@ func testPurchaseSetup(t *testing.T) *Server {
 		"postgres",
 		"postgres",
 		"public",
-		nil,
+		&database.ConnectionPoolConfig{
+			MaxOpenConns:    20,
+			MaxIdleConns:    10,
+			ConnMaxIdleTime: 30 * time.Second,
+			ConnMaxLifeTime: 300 * time.Second,
+		},
 	))
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
 	imageCompressor := imagecompressor.New(5, 50)
