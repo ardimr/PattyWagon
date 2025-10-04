@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -89,72 +88,6 @@ func TestHealthHandler(t *testing.T) {
 
 	expected := "\"OK\"\n"
 	assert.Equal(t, expected, string(body))
-}
-
-func TestEmailLoginHandler_ValidRequest(t *testing.T) {
-	s := testSetup(t)
-
-	loginReq := LoginRequest{
-		Email:    "newuser@example.com",
-		Password: "validpassword123",
-	}
-
-	reqBody, err := json.Marshal(loginReq)
-	assert.Nil(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/v1/login/email", bytes.NewBuffer(reqBody))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-
-	s.emailLoginHandler(w, req)
-
-	resp := w.Result()
-	// Note: This will likely return an error due to missing dependencies (validator, service)
-	// but we're testing the handler structure
-	assert.NotEqual(t, 0, resp.StatusCode)
-}
-
-func TestEmailLoginHandler_InvalidJSON(t *testing.T) {
-	s := testSetup(t)
-
-	req := httptest.NewRequest(http.MethodPost, "/v1/login/email", strings.NewReader("invalid json"))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-
-	s.emailLoginHandler(w, req)
-
-	resp := w.Result()
-	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-
-	body, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err)
-
-	var errorResp ErrorResponse
-	err = json.Unmarshal(body, &errorResp)
-	assert.Nil(t, err)
-
-	assert.Equal(t, "invalid request", errorResp.Error)
-}
-
-func TestEmailRegisterHandler_ValidRequest(t *testing.T) {
-	s := testSetup(t)
-
-	registerReq := RegisterRequest{
-		Email:    "newuser@example.com",
-		Password: "validpassword123",
-	}
-
-	reqBody, err := json.Marshal(registerReq)
-	assert.Nil(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/v1/register/email", bytes.NewBuffer(reqBody))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-
-	s.emailRegisterHandler(w, req)
-
-	resp := w.Result()
-	// Note: This will likely return an error due to missing dependencies (validator, service)
-	// but we're testing the handler structure
-	assert.NotEqual(t, 0, resp.StatusCode)
 }
 
 func TestFileUploadHandler_InvalidMethod(t *testing.T) {

@@ -166,15 +166,15 @@ func (q *Queries) ListMerchantWithItems(ctx context.Context, filter model.ListMe
 	}
 
 	// Add sorting
-	if filter.SortingOrder != nil {
-		if strings.ToLower(*filter.SortingOrder) == "asc" {
-			query += " ORDER BY m.created_at ASC"
-		} else {
-			query += " ORDER BY m.created_at DESC"
-		}
-	} else {
-		query += " ORDER BY m.created_at DESC"
-	}
+	// if filter.SortingOrder != nil {
+	// 	if strings.ToLower(*filter.SortingOrder) == "asc" {
+	// 		query += " ORDER BY m.created_at ASC"
+	// 	} else {
+	// 		query += " ORDER BY m.created_at DESC"
+	// 	}
+	// } else {
+	// 	query += " ORDER BY m.created_at DESC"
+	// }
 
 	rows, err := q.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -192,10 +192,10 @@ func (q *Queries) ListMerchantWithItems(ctx context.Context, filter model.ListMe
 		err := rows.Scan(
 			&merchantItem.Merchant.ID,
 			&merchantItem.Merchant.Name,
-			&merchantItem.Merchant.MerchantCategory,
-			&merchantItem.Merchant.ImageUrl,
-			&merchantItem.Merchant.Location.Lat,
-			&merchantItem.Merchant.Location.Long,
+			&merchantItem.Merchant.Category,
+			&merchantItem.Merchant.ImageURL,
+			&merchantItem.Merchant.Latitude,
+			&merchantItem.Merchant.Longitude,
 			&merchantItem.Merchant.CreatedAt,
 			&items,
 		)
@@ -229,10 +229,10 @@ func (q *Queries) GetMerchantWithItems(ctx context.Context, merchantID int64) (m
 	err := q.db.QueryRowContext(ctx, getMerchantWithItems, merchantID).Scan(
 		&merchantItem.Merchant.ID,
 		&merchantItem.Merchant.Name,
-		&merchantItem.Merchant.MerchantCategory,
-		&merchantItem.Merchant.ImageUrl,
-		&merchantItem.Merchant.Location.Lat,
-		&merchantItem.Merchant.Location.Long,
+		&merchantItem.Merchant.Category,
+		&merchantItem.Merchant.ImageURL,
+		&merchantItem.Merchant.Latitude,
+		&merchantItem.Merchant.Longitude,
 		&merchantItem.Merchant.CreatedAt,
 		&items,
 	)

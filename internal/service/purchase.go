@@ -1,7 +1,6 @@
 package service
 
 import (
-	"PattyWagon/internal/constants"
 	"PattyWagon/internal/model"
 	"PattyWagon/internal/utils"
 	"PattyWagon/logger"
@@ -179,8 +178,8 @@ func (s *Service) sortAndLimitNearbyMerchants(userLocation model.Location, merch
 	lenMerchants := len(merchants)
 
 	slices.SortFunc(merchants, func(m1, m2 model.MerchantItem) int {
-		d1 := utils.CalculateDistance(userLocation.Lat, userLocation.Long, m1.Merchant.Location.Lat, m1.Merchant.Location.Long)
-		d2 := utils.CalculateDistance(userLocation.Lat, userLocation.Long, m2.Merchant.Location.Lat, m2.Merchant.Location.Long)
+		d1 := utils.CalculateDistance(userLocation.Lat, userLocation.Long, m1.Merchant.Latitude, m1.Merchant.Longitude)
+		d2 := utils.CalculateDistance(userLocation.Lat, userLocation.Long, m2.Merchant.Latitude, m2.Merchant.Longitude)
 		return int(d1 - d2)
 	})
 
@@ -196,52 +195,52 @@ func (s *Service) sortAndLimitNearbyMerchants(userLocation model.Location, merch
 	return merchants[offset:end]
 }
 
-func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.OrderEstimation) (model.EstimationPrice, error) {
-	isStartingPointValid := false
+// func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.OrderEstimation) (model.EstimationPrice, error) {
+// 	isStartingPointValid := false
 
-	var locations []model.Location
-	var totalPrice float64 = 0
-	for _, order := range orderEstimation.Orders {
-		isStartingPointValid = isStartingPointValid != order.IsStartingPoint
+// 	var locations []model.Location
+// 	var totalPrice float64 = 0
+// 	for _, order := range orderEstimation.Orders {
+// 		isStartingPointValid = isStartingPointValid != order.IsStartingPoint
 
-		merchant, err := s.repository.GetMerchantByID(ctx, order.MerchantID)
-		if err != nil {
-			return model.EstimationPrice{}, err
-		}
+// 		merchant, err := s.repository.GetMerchantByID(ctx, order.MerchantID)
+// 		if err != nil {
+// 			return model.EstimationPrice{}, err
+// 		}
 
-		if !s.validateDistance(orderEstimation.UserLocation, merchant.Location) {
-			return model.EstimationPrice{}, constants.ErrMerchantTooFar
-		}
+// 		if !s.validateDistance(orderEstimation.UserLocation, merchant.Location) {
+// 			return model.EstimationPrice{}, constants.ErrMerchantTooFar
+// 		}
 
-		for _, orderItem := range order.Items {
-			item, err := s.repository.GetItemByID(ctx, orderItem.ItemID)
-			if err != nil {
-				return model.EstimationPrice{}, err
-			}
+// 		for _, orderItem := range order.Items {
+// 			item, err := s.repository.GetItemByID(ctx, orderItem.ItemID)
+// 			if err != nil {
+// 				return model.EstimationPrice{}, err
+// 			}
 
-			totalPrice += float64(orderItem.Quantity) * item.Price
-		}
+// 			totalPrice += float64(orderItem.Quantity) * item.Price
+// 		}
 
-		merchant.Location.IsStartingPoint = order.IsStartingPoint
-		locations = append(locations, merchant.Location)
-	}
+// 		merchant.Location.IsStartingPoint = order.IsStartingPoint
+// 		locations = append(locations, merchant.Location)
+// 	}
 
-	if !isStartingPointValid {
-		return model.EstimationPrice{}, constants.ErrInvalidStartingPoint
-	}
+// 	if !isStartingPointValid {
+// 		return model.EstimationPrice{}, constants.ErrInvalidStartingPoint
+// 	}
 
-	// estimatedDeliveryTimeInMinutes, err := s.locationService.EstimateDeliveryTimeInMinutes(ctx, locations)
-	// if err != nil {
-	// 	return model.EstimationPrice{}, err
-	// }
+// 	// estimatedDeliveryTimeInMinutes, err := s.locationService.EstimateDeliveryTimeInMinutes(ctx, locations)
+// 	// if err != nil {
+// 	// 	return model.EstimationPrice{}, err
+// 	// }
 
-	estimationPrice := model.EstimationPrice{
-		EstimatedDeliveryInMinutes: 6,
-		TotalPrice:                 totalPrice,
-	}
+// 	estimationPrice := model.EstimationPrice{
+// 		EstimatedDeliveryInMinutes: 6,
+// 		TotalPrice:                 totalPrice,
+// 	}
 
-	return estimationPrice, nil
-}
+// 	return estimationPrice, nil
+// }
 
 func (s *Service) validateDistance(user, merchant model.Location) bool {
 

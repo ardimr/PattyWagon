@@ -4,6 +4,7 @@ import (
 	"PattyWagon/internal/database"
 	"PattyWagon/internal/model"
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -37,7 +38,7 @@ func TestListMerchantWitItems(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
 		filter := model.ListMerchantWithItemParams{
 			Cell: &model.Cell{
-				CellID:     1,
+				CellID:     610049360213835775,
 				Resolution: 8,
 			},
 			MerchantParams: model.MerchantParams{
@@ -60,6 +61,10 @@ func TestListMerchantWitItems(t *testing.T) {
 			},
 		}
 		merchantItems, err := repo.ListMerchantWithItems(context.TODO(), filter)
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		assert.Nil(t, err)
 		assert.NotEmpty(t, merchantItems)
 

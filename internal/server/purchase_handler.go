@@ -4,7 +4,6 @@ import (
 	"PattyWagon/internal/constants"
 	"PattyWagon/internal/utils"
 	"PattyWagon/observability"
-	"encoding/json"
 	"net/http"
 )
 
@@ -62,41 +61,41 @@ func (s *Server) FindNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, http.StatusOK, resp)
 }
 
-func (s *Server) EstimateOrderPrice(w http.ResponseWriter, r *http.Request) {
-	ctx, span := observability.Tracer.Start(r.Context(), "handler.estimate_order_price")
-	defer span.End()
+// func (s *Server) EstimateOrderPrice(w http.ResponseWriter, r *http.Request) {
+// 	ctx, span := observability.Tracer.Start(r.Context(), "handler.estimate_order_price")
+// 	defer span.End()
 
-	var req OrderEstimationRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		sendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
+// 	var req OrderEstimationRequest
+// 	err := json.NewDecoder(r.Body).Decode(&req)
+// 	if err != nil {
+// 		sendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	err = s.validator.Struct(req)
-	if err != nil {
-		sendErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
+// 	err = s.validator.Struct(req)
+// 	if err != nil {
+// 		sendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		return
+// 	}
 
-	orderEstimationRequest := req.ToModel()
+// 	orderEstimationRequest := req.ToModel()
 
-	estimationPrice, err := s.service.EstimateOrderPrice(ctx, orderEstimationRequest)
-	if err != nil {
-		switch err {
-		case constants.ErrMerchantNotFound:
-			sendErrorResponse(w, http.StatusNotFound, err.Error())
-		case constants.ErrItemNotFound:
-			sendErrorResponse(w, http.StatusNotFound, err.Error())
-		case constants.ErrInvalidStartingPoint:
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
-		case constants.ErrMerchantTooFar:
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
-		default:
-			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
-		}
-		return
-	}
+// 	estimationPrice, err := s.service.EstimateOrderPrice(ctx, orderEstimationRequest)
+// 	if err != nil {
+// 		switch err {
+// 		case constants.ErrMerchantNotFound:
+// 			sendErrorResponse(w, http.StatusNotFound, err.Error())
+// 		case constants.ErrItemNotFound:
+// 			sendErrorResponse(w, http.StatusNotFound, err.Error())
+// 		case constants.ErrInvalidStartingPoint:
+// 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		case constants.ErrMerchantTooFar:
+// 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+// 		default:
+// 			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+// 		}
+// 		return
+// 	}
 
-	sendResponse(w, http.StatusOK, NewEstimationPriceResponse(estimationPrice))
-}
+// 	sendResponse(w, http.StatusOK, NewEstimationPriceResponse(estimationPrice))
+// }

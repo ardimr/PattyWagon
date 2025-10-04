@@ -30,7 +30,7 @@ type Service interface {
 	GetItems(ctx context.Context, req model.FilterItem) (res []model.Item, err error)
 
 	// Purchase
-	EstimateOrderPrice(ctx context.Context, req model.OrderEstimation) (model.EstimationPrice, error)
+	// EstimateOrderPrice(ctx context.Context, req model.OrderEstimation) (model.EstimationPrice, error)
 	FindNearbyMerchants(ctx context.Context, userLocation model.Location, searchParams model.FindNerbyMerchantParams) ([]model.MerchantItem, error)
 }
 

@@ -3,6 +3,7 @@ package server
 import (
 	"PattyWagon/internal/model"
 	"strconv"
+	"time"
 )
 
 type EstimationPriceResponse struct {
@@ -36,15 +37,15 @@ type Merchant struct {
 	MerchantCategory string           `json:"merchantCategory"`
 	ImageUrl         string           `json:"imageUrl"`
 	Location         LocationResponse `json:"location"`
-	CreatedAt        int64            `json:"createdAt"`
+	CreatedAt        time.Time        `json:"createdAt"`
 }
 
 type Item struct {
-	ItemID          string `json:"itemId"`
-	Name            string `json:"name"`
-	ProductCategory string `json:"productCategory"`
-	ImageUrl        string `json:"imageUrl"`
-	CreatedAt       int64  `json:"createdAt"`
+	ItemID          string    `json:"itemId"`
+	Name            string    `json:"name"`
+	ProductCategory string    `json:"productCategory"`
+	ImageUrl        string    `json:"imageUrl"`
+	CreatedAt       time.Time `json:"createdAt"`
 }
 
 type MerchantWithItem struct {
@@ -62,21 +63,21 @@ type FindNearbyMerchantsResponse struct {
 	Meta FindNearbyMerchantsResponseMeta `json:"meta"`
 }
 
-func NewLocationResponse(input model.Location) LocationResponse {
+func NewLocationResponse(lat, long float64) LocationResponse {
 	return LocationResponse{
-		Lat:  input.Lat,
-		Long: input.Long,
+		Lat:  lat,
+		Long: long,
 	}
 }
 
 func NewMerchantResponse(input model.Merchant) Merchant {
 	return Merchant{
 		MerchantID:       strconv.Itoa(int(input.ID)),
-		Location:         NewLocationResponse(input.Location),
+		Location:         NewLocationResponse(input.Latitude, input.Longitude),
 		Name:             input.Name,
-		MerchantCategory: input.MerchantCategory,
-		ImageUrl:         input.ImageUrl,
-		CreatedAt:        input.CreatedAt.Unix(),
+		MerchantCategory: *input.Category,
+		ImageUrl:         input.ImageURL,
+		CreatedAt:        input.CreatedAt,
 	}
 }
 
@@ -84,9 +85,9 @@ func NewItemResponse(input model.Item) Item {
 	return Item{
 		ItemID:          strconv.Itoa(int(input.ID)),
 		Name:            input.Name,
-		ProductCategory: input.ProductCategory,
-		ImageUrl:        input.ImageUrl,
-		CreatedAt:       input.CreatedAt.Unix(),
+		ProductCategory: input.Category,
+		ImageUrl:        input.ImageURL,
+		CreatedAt:       input.CreatedAt,
 	}
 }
 

@@ -1,7 +1,5 @@
 package model
 
-import "time"
-
 type OrderEstimation struct {
 	UserLocation Location
 	Orders       []Order
@@ -13,14 +11,14 @@ type Order struct {
 	Items           []OrderItem
 }
 
-type Item struct {
-	ID              int64     `json:"id"`
-	Name            string    `json:"name"`
-	Price           float64   `json:"price"`
-	ProductCategory string    `json:"category"`
-	ImageUrl        string    `json:"image_url"`
-	CreatedAt       time.Time `json:"created_at"`
-}
+// type Item struct {
+// 	ID              int64     `json:"id"`
+// 	Name            string    `json:"name"`
+// 	Price           float64   `json:"price"`
+// 	ProductCategory string    `json:"category"`
+// 	ImageUrl        string    `json:"image_url"`
+// 	CreatedAt       time.Time `json:"created_at"`
+// }
 
 type OrderItem struct {
 	ItemID   int64

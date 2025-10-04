@@ -12,7 +12,6 @@ import (
 	"PattyWagon/internal/service"
 	"PattyWagon/internal/storage"
 	"PattyWagon/internal/utils"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -24,6 +23,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+func stringPtr(s string) *string {
+	return &s
+}
 
 func testPurchaseSetup(t *testing.T) *Server {
 	// repo := &mock_repository.TestRepositoryMock{}
@@ -60,27 +63,23 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 	t.Helper()
 	t.Log("Populating Mock Repository")
 	validMerchant := model.Merchant{
-		Location: model.Location{
-			Lat:  6.1753,
-			Long: 106.8271,
-		},
-		Name:             "Store A",
-		MerchantCategory: "TODO",
-		ImageUrl:         "http://minio",
-		ID:               1,
-		CreatedAt:        time.Now(),
+		Latitude:  6.1753,
+		Longitude: 106.8271,
+		Name:      "Store A",
+		Category:  stringPtr("TODO"),
+		ImageURL:  "http://minio",
+		ID:        1,
+		CreatedAt: time.Now(),
 	}
 
 	tooFarMerchant := model.Merchant{
-		Location: model.Location{
-			Lat:  35.6764,
-			Long: 139.6500,
-		},
-		Name:             "Store A",
-		MerchantCategory: "TODO",
-		ImageUrl:         "http://minio",
-		ID:               1,
-		CreatedAt:        time.Now(),
+		Latitude:  35.6764,
+		Longitude: 139.6500,
+		Name:      "Store A",
+		Category:  stringPtr("TODO"),
+		ImageURL:  "http://minio",
+		ID:        1,
+		CreatedAt: time.Now(),
 	}
 
 	validItem := model.Item{
@@ -90,21 +89,21 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 
 	// Generate merchants with different locations and IDs
 	merchants := []model.Merchant{
-		{ID: 1, Name: "Warung Sate Pak Budi", Location: model.Location{Lat: 6.1753, Long: 106.8271}, MerchantCategory: "Street Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 2, Name: "Bakso Malang Enak", Location: model.Location{Lat: 6.1760, Long: 106.8280}, MerchantCategory: "Restaurant", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 3, Name: "Nasi Gudeg Bu Sri", Location: model.Location{Lat: 6.1745, Long: 106.8265}, MerchantCategory: "Traditional Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 4, Name: "Cafe Kopi Hitam", Location: model.Location{Lat: 6.1770, Long: 106.8290}, MerchantCategory: "Cafe", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 5, Name: "Mie Ayam Pak Tarno", Location: model.Location{Lat: 6.1740, Long: 106.8260}, MerchantCategory: "Street Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 6, Name: "Seafood Bu Inem", Location: model.Location{Lat: 6.1780, Long: 106.8300}, MerchantCategory: "Seafood", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 7, Name: "Pizza Corner", Location: model.Location{Lat: 6.1765, Long: 106.8275}, MerchantCategory: "Fast Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 8, Name: "Sushi Zen", Location: model.Location{Lat: 6.1755, Long: 106.8285}, MerchantCategory: "Japanese", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 9, Name: "Burger Joint", Location: model.Location{Lat: 6.1750, Long: 106.8270}, MerchantCategory: "Fast Food", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 10, Name: "Taco Fiesta", Location: model.Location{Lat: 6.1775, Long: 106.8295}, MerchantCategory: "Mexican", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 11, Name: "Dim Sum Palace", Location: model.Location{Lat: 6.1748, Long: 106.8268}, MerchantCategory: "Chinese", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 12, Name: "Pasta Italia", Location: model.Location{Lat: 6.1772, Long: 106.8292}, MerchantCategory: "Italian", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 13, Name: "Roti Bakar 88", Location: model.Location{Lat: 6.1742, Long: 106.8262}, MerchantCategory: "Bakery", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 14, Name: "Ayam Geprek Bensu", Location: model.Location{Lat: 6.1778, Long: 106.8298}, MerchantCategory: "Indonesian", ImageUrl: "http://minio", CreatedAt: time.Now()},
-		{ID: 15, Name: "Smoothie Bar", Location: model.Location{Lat: 6.1758, Long: 106.8278}, MerchantCategory: "Beverages", ImageUrl: "http://minio", CreatedAt: time.Now()},
+		{ID: 1, Name: "Warung Sate Pak Budi", Latitude: 6.1753, Longitude: 106.8271, Category: stringPtr("Street Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 2, Name: "Bakso Malang Enak", Latitude: 6.1760, Longitude: 106.8280, Category: stringPtr("Restaurant"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 3, Name: "Nasi Gudeg Bu Sri", Latitude: 6.1745, Longitude: 106.8265, Category: stringPtr("Traditional Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 4, Name: "Cafe Kopi Hitam", Latitude: 6.1770, Longitude: 106.8290, Category: stringPtr("Cafe"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 5, Name: "Mie Ayam Pak Tarno", Latitude: 6.1740, Longitude: 106.8260, Category: stringPtr("Street Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 6, Name: "Seafood Bu Inem", Latitude: 6.1780, Longitude: 106.8300, Category: stringPtr("Seafood"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 7, Name: "Pizza Corner", Latitude: 6.1765, Longitude: 106.8275, Category: stringPtr("Fast Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 8, Name: "Sushi Zen", Latitude: 6.1755, Longitude: 106.8285, Category: stringPtr("Japanese"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 9, Name: "Burger Joint", Latitude: 6.1750, Longitude: 106.8270, Category: stringPtr("Fast Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 10, Name: "Taco Fiesta", Latitude: 6.1775, Longitude: 106.8295, Category: stringPtr("Mexican"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 11, Name: "Dim Sum Palace", Latitude: 6.1748, Longitude: 106.8268, Category: stringPtr("Chinese"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 12, Name: "Pasta Italia", Latitude: 6.1772, Longitude: 106.8292, Category: stringPtr("Italian"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 13, Name: "Roti Bakar 88", Latitude: 6.1742, Longitude: 106.8262, Category: stringPtr("Bakery"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 14, Name: "Ayam Geprek Bensu", Latitude: 6.1778, Longitude: 106.8298, Category: stringPtr("Indonesian"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 15, Name: "Smoothie Bar", Latitude: 6.1758, Longitude: 106.8278, Category: stringPtr("Beverages"), ImageURL: "http://minio", CreatedAt: time.Now()},
 	}
 
 	// Generate items for each merchant
@@ -185,211 +184,6 @@ func validateMerchantsOrderedByDistance(t *testing.T, userLat, userLon float64, 
 		prevDistance = distance
 		t.Logf("Merchant %d: %s - Distance: %.2f meters", i, merchant.Merchant.Name, distance)
 	}
-}
-
-func TestEstimateOrderPrice(t *testing.T) {
-	t.Skip()
-	s := testPurchaseSetup(t)
-
-	validReq := OrderEstimationRequest{
-		UserLocation: LocationRequest{
-			Lat:  6.1674,
-			Long: 106.8209,
-		},
-
-		Orders: []OrderRequest{
-			{
-				MerchantID:      "1",
-				IsStartingPoint: true,
-				Items: []OrderItemRequest{
-					{ItemID: "1", Quantity: 1},
-					{ItemID: "2", Quantity: 2},
-				},
-			},
-			{
-				MerchantID:      "2",
-				IsStartingPoint: false,
-				Items: []OrderItemRequest{
-					{ItemID: "3", Quantity: 1},
-					{ItemID: "4", Quantity: 2},
-				},
-			},
-		},
-	}
-
-	invalidStartingPointReq := OrderEstimationRequest{
-		UserLocation: LocationRequest{
-			Lat:  6.1674,
-			Long: 106.8209,
-		},
-
-		Orders: []OrderRequest{
-			{
-				MerchantID:      "1",
-				IsStartingPoint: true,
-				Items: []OrderItemRequest{
-					{ItemID: "1", Quantity: 1},
-					{ItemID: "2", Quantity: 2},
-				},
-			},
-			{
-				MerchantID:      "2",
-				IsStartingPoint: true,
-				Items: []OrderItemRequest{
-					{ItemID: "3", Quantity: 1},
-					{ItemID: "4", Quantity: 2},
-				},
-			},
-		},
-	}
-
-	invaliMerchantTooFarReq := OrderEstimationRequest{
-		UserLocation: LocationRequest{
-			Lat:  6.1674,
-			Long: 106.8209,
-		},
-
-		Orders: []OrderRequest{
-			{
-				MerchantID:      "1",
-				IsStartingPoint: true,
-				Items: []OrderItemRequest{
-					{ItemID: "1", Quantity: 1},
-					{ItemID: "2", Quantity: 2},
-				},
-			},
-			{
-				MerchantID:      "99",
-				IsStartingPoint: false,
-				Items: []OrderItemRequest{
-					{ItemID: "3", Quantity: 1},
-					{ItemID: "4", Quantity: 2},
-				},
-			},
-		},
-	}
-
-	InvalidMerchantNotFound := OrderEstimationRequest{
-		UserLocation: LocationRequest{
-			Lat:  6.1674,
-			Long: 106.8209,
-		},
-
-		Orders: []OrderRequest{
-			{
-				MerchantID:      "100",
-				IsStartingPoint: true,
-				Items: []OrderItemRequest{
-					{ItemID: "1", Quantity: 1},
-					{ItemID: "2", Quantity: 2},
-				},
-			},
-			{
-				MerchantID:      "1",
-				IsStartingPoint: false,
-				Items: []OrderItemRequest{
-					{ItemID: "3", Quantity: 1},
-					{ItemID: "4", Quantity: 2},
-				},
-			},
-		},
-	}
-
-	InvalidItemNotFound := OrderEstimationRequest{
-		UserLocation: LocationRequest{
-			Lat:  6.1674,
-			Long: 106.8209,
-		},
-
-		Orders: []OrderRequest{
-			{
-				MerchantID:      "1",
-				IsStartingPoint: true,
-				Items: []OrderItemRequest{
-					{ItemID: "1", Quantity: 1},
-					{ItemID: "2", Quantity: 2},
-				},
-			},
-			{
-				MerchantID:      "2",
-				IsStartingPoint: false,
-				Items: []OrderItemRequest{
-					{ItemID: "100", Quantity: 1},
-					{ItemID: "4", Quantity: 2},
-				},
-			},
-		},
-	}
-
-	t.Run("Valid", func(t *testing.T) {
-		reqBody, err := json.Marshal(validReq)
-		assert.Nil(t, err)
-
-		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
-		w := httptest.NewRecorder()
-
-		s.EstimateOrderPrice(w, req)
-
-		resp := w.Result()
-		assert.NotEqual(t, 0, resp.StatusCode)
-		fmt.Printf("Response Body: %v\n", w.Body.String())
-	})
-
-	t.Run("Invalid_StartingPoint", func(t *testing.T) {
-		reqBody, err := json.Marshal(invalidStartingPointReq)
-		assert.Nil(t, err)
-
-		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
-		w := httptest.NewRecorder()
-
-		s.EstimateOrderPrice(w, req)
-
-		resp := w.Result()
-		assert.Equal(t, 400, resp.StatusCode)
-		fmt.Printf("Response Body: %v\n", w.Body.String())
-	})
-
-	t.Run("Invalid_MerchantTooFar", func(t *testing.T) {
-		reqBody, err := json.Marshal(invaliMerchantTooFarReq)
-		assert.Nil(t, err)
-
-		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
-		w := httptest.NewRecorder()
-
-		s.EstimateOrderPrice(w, req)
-
-		resp := w.Result()
-		assert.Equal(t, 400, resp.StatusCode)
-		fmt.Printf("Response Body: %v\n", w.Body.String())
-	})
-
-	t.Run("Invalid_MerchantNotFound", func(t *testing.T) {
-		reqBody, err := json.Marshal(InvalidMerchantNotFound)
-		assert.Nil(t, err)
-
-		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
-		w := httptest.NewRecorder()
-
-		s.EstimateOrderPrice(w, req)
-
-		resp := w.Result()
-		assert.Equal(t, 404, resp.StatusCode)
-		fmt.Printf("Response Body: %v\n", w.Body.String())
-	})
-
-	t.Run("Invalid_ItemNotFound", func(t *testing.T) {
-		reqBody, err := json.Marshal(InvalidItemNotFound)
-		assert.Nil(t, err)
-
-		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
-		w := httptest.NewRecorder()
-
-		s.EstimateOrderPrice(w, req)
-
-		resp := w.Result()
-		assert.Equal(t, 404, resp.StatusCode)
-		fmt.Printf("Response Body: %v\n", w.Body.String())
-	})
 }
 
 func TestGetNearbyMerchants(t *testing.T) {
@@ -552,3 +346,208 @@ func TestGetNearbyMerchants(t *testing.T) {
 		assert.Equal(t, 405, resp.StatusCode)
 	})
 }
+
+// func TestEstimateOrderPrice(t *testing.T) {
+// 	t.Skip()
+// 	s := testPurchaseSetup(t)
+
+// 	validReq := OrderEstimationRequest{
+// 		UserLocation: LocationRequest{
+// 			Lat:  6.1674,
+// 			Long: 106.8209,
+// 		},
+
+// 		Orders: []OrderRequest{
+// 			{
+// 				MerchantID:      "1",
+// 				IsStartingPoint: true,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "1", Quantity: 1},
+// 					{ItemID: "2", Quantity: 2},
+// 				},
+// 			},
+// 			{
+// 				MerchantID:      "2",
+// 				IsStartingPoint: false,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "3", Quantity: 1},
+// 					{ItemID: "4", Quantity: 2},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	invalidStartingPointReq := OrderEstimationRequest{
+// 		UserLocation: LocationRequest{
+// 			Lat:  6.1674,
+// 			Long: 106.8209,
+// 		},
+
+// 		Orders: []OrderRequest{
+// 			{
+// 				MerchantID:      "1",
+// 				IsStartingPoint: true,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "1", Quantity: 1},
+// 					{ItemID: "2", Quantity: 2},
+// 				},
+// 			},
+// 			{
+// 				MerchantID:      "2",
+// 				IsStartingPoint: true,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "3", Quantity: 1},
+// 					{ItemID: "4", Quantity: 2},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	invaliMerchantTooFarReq := OrderEstimationRequest{
+// 		UserLocation: LocationRequest{
+// 			Lat:  6.1674,
+// 			Long: 106.8209,
+// 		},
+
+// 		Orders: []OrderRequest{
+// 			{
+// 				MerchantID:      "1",
+// 				IsStartingPoint: true,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "1", Quantity: 1},
+// 					{ItemID: "2", Quantity: 2},
+// 				},
+// 			},
+// 			{
+// 				MerchantID:      "99",
+// 				IsStartingPoint: false,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "3", Quantity: 1},
+// 					{ItemID: "4", Quantity: 2},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	InvalidMerchantNotFound := OrderEstimationRequest{
+// 		UserLocation: LocationRequest{
+// 			Lat:  6.1674,
+// 			Long: 106.8209,
+// 		},
+
+// 		Orders: []OrderRequest{
+// 			{
+// 				MerchantID:      "100",
+// 				IsStartingPoint: true,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "1", Quantity: 1},
+// 					{ItemID: "2", Quantity: 2},
+// 				},
+// 			},
+// 			{
+// 				MerchantID:      "1",
+// 				IsStartingPoint: false,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "3", Quantity: 1},
+// 					{ItemID: "4", Quantity: 2},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	InvalidItemNotFound := OrderEstimationRequest{
+// 		UserLocation: LocationRequest{
+// 			Lat:  6.1674,
+// 			Long: 106.8209,
+// 		},
+
+// 		Orders: []OrderRequest{
+// 			{
+// 				MerchantID:      "1",
+// 				IsStartingPoint: true,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "1", Quantity: 1},
+// 					{ItemID: "2", Quantity: 2},
+// 				},
+// 			},
+// 			{
+// 				MerchantID:      "2",
+// 				IsStartingPoint: false,
+// 				Items: []OrderItemRequest{
+// 					{ItemID: "100", Quantity: 1},
+// 					{ItemID: "4", Quantity: 2},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	t.Run("Valid", func(t *testing.T) {
+// 		reqBody, err := json.Marshal(validReq)
+// 		assert.Nil(t, err)
+
+// 		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
+// 		w := httptest.NewRecorder()
+
+// 		s.EstimateOrderPrice(w, req)
+
+// 		resp := w.Result()
+// 		assert.NotEqual(t, 0, resp.StatusCode)
+// 		fmt.Printf("Response Body: %v\n", w.Body.String())
+// 	})
+
+// 	t.Run("Invalid_StartingPoint", func(t *testing.T) {
+// 		reqBody, err := json.Marshal(invalidStartingPointReq)
+// 		assert.Nil(t, err)
+
+// 		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
+// 		w := httptest.NewRecorder()
+
+// 		s.EstimateOrderPrice(w, req)
+
+// 		resp := w.Result()
+// 		assert.Equal(t, 400, resp.StatusCode)
+// 		fmt.Printf("Response Body: %v\n", w.Body.String())
+// 	})
+
+// 	t.Run("Invalid_MerchantTooFar", func(t *testing.T) {
+// 		reqBody, err := json.Marshal(invaliMerchantTooFarReq)
+// 		assert.Nil(t, err)
+
+// 		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
+// 		w := httptest.NewRecorder()
+
+// 		s.EstimateOrderPrice(w, req)
+
+// 		resp := w.Result()
+// 		assert.Equal(t, 400, resp.StatusCode)
+// 		fmt.Printf("Response Body: %v\n", w.Body.String())
+// 	})
+
+// 	t.Run("Invalid_MerchantNotFound", func(t *testing.T) {
+// 		reqBody, err := json.Marshal(InvalidMerchantNotFound)
+// 		assert.Nil(t, err)
+
+// 		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
+// 		w := httptest.NewRecorder()
+
+// 		s.EstimateOrderPrice(w, req)
+
+// 		resp := w.Result()
+// 		assert.Equal(t, 404, resp.StatusCode)
+// 		fmt.Printf("Response Body: %v\n", w.Body.String())
+// 	})
+
+// 	t.Run("Invalid_ItemNotFound", func(t *testing.T) {
+// 		reqBody, err := json.Marshal(InvalidItemNotFound)
+// 		assert.Nil(t, err)
+
+// 		req := httptest.NewRequest(http.MethodPost, "/v1/users/estimate", bytes.NewBuffer(reqBody))
+// 		w := httptest.NewRecorder()
+
+// 		s.EstimateOrderPrice(w, req)
+
+// 		resp := w.Result()
+// 		assert.Equal(t, 404, resp.StatusCode)
+// 		fmt.Printf("Response Body: %v\n", w.Body.String())
+// 	})
+// }
