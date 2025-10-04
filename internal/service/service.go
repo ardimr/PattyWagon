@@ -17,9 +17,7 @@ type Repository interface {
 	// User
 	// User Repository
 	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
-	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
-
-	IsUserExist(ctx context.Context, userID int64) (bool, error)
+	SelectUserCredentialsByUsernameAndRole(ctx context.Context, username string, role int16) (res model.User, err error)
 
 	// File
 	GetFileUpload(ctx context.Context, id int64) (model.File, error)
