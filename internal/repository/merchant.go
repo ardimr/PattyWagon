@@ -13,7 +13,7 @@ func (q *Queries) InsertMerchant(ctx context.Context, data model.Merchant) (res 
 		INSERT INTO merchants (
 			user_id, name, category, image_url, latitude, longitude, created_at, updated_at
 		) VALUES (
-			$1, $2, $3, $4, $5, NOW(), NOW()
+			$1, $2, $3, $4, $5, $6, NOW(), NOW()
 		)
 		RETURNING id
 	`

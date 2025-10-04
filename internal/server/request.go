@@ -13,14 +13,14 @@ type RegisterRequest struct {
 
 type CreateMerchantRequest struct {
 	Name     string         `json:"name" validate:"required,min=2,max=30"`
-	Category string         `json:"category" validate:"required,merchantCategory"`
-	ImageURL string         `json:"image_url" validate:"required"`
+	Category string         `json:"merchantCategory" validate:"required,merchantCategory"`
+	ImageURL string         `json:"imageUrl" validate:"required"`
 	Location DetailLocation `json:"location" validate:"required"`
 }
 
 type DetailLocation struct {
-	Latitude  float64 `json:"latitude" validate:"required"`
-	Longitude float64 `json:"longitude" validate:"required"`
+	Latitude  float64 `json:"lat" validate:"required"`
+	Longitude float64 `json:"long" validate:"required"`
 }
 
 type GetMerchantRequest struct {
