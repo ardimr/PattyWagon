@@ -48,11 +48,17 @@ func (s *Server) FindNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 		MerchantCategory: query.Get("merchantCategory"),
 	}
 
-	merchants, err := s.service.FindNearbyMerchants(ctx, userLocation.ToModel(), searchParams.ToModel())
+	filter := searchParams.ToModel()
+	merchants, err := s.service.FindNearbyMerchants(ctx, userLocation.ToModel(), filter)
 	if err != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 	}
-	resp := NewFindNearbyMerchantsResponse(merchants)
+	meta := FindNearbyMerchantsResponseMeta{
+		Limit:  filter.Limit,
+		Offset: filter.Offset,
+		Total:  len(merchants),
+	}
+	resp := NewFindNearbyMerchantsResponse(merchants, meta)
 	sendResponse(w, http.StatusOK, resp)
 }
 

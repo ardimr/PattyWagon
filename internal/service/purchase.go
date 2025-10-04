@@ -29,7 +29,8 @@ func (s *Service) findNearbyMerchantsWithStrategy(ctx context.Context, userLocat
 
 	numAcquiredMerchants := 0
 	numRequiredMerchants := filter.MerchantParams.Limit + filter.MerchantParams.Offset
-	log.Printf("limit: %d offset:%d", filter.Limit, filter.Offset)
+	log.Printf("limit: %d offset:%d requiredMerchants: %d", filter.Limit, filter.Offset, numRequiredMerchants)
+
 	cellMap := make(map[int64]model.Cell, 0)
 	seenMerchants := make(map[int64]struct{}, 0)
 
@@ -42,6 +43,17 @@ func (s *Service) findNearbyMerchantsWithStrategy(ctx context.Context, userLocat
 	// - find nearby merhants starting from the k-ring 1
 	// - if the retrieved merchants less than numRequiredMerchants, expand to k-ring
 	// - if k-ring reaches limit (max k-ring) just return all merchants from database ordered by distance
+
+	// Precheck
+
+	if filter.MerchantID != nil {
+		log.Printf("Get merchant with items directly: (%d)", *filter.MerchantID)
+		merchantItem, err := s.repository.GetMerchantWithItems(ctx, *filter.MerchantID)
+		if err != nil {
+			return nil, err
+		}
+		return []model.MerchantItem{merchantItem}, nil
+	}
 
 	// Phase 1
 	for (numAcquiredMerchants < numRequiredMerchants) && (kRing < maxKRing) {
@@ -69,7 +81,8 @@ func (s *Service) findNearbyMerchantsWithStrategy(ctx context.Context, userLocat
 		merchants = append(merchants, filteredMerchants...)
 	}
 
-	return s.sortAndLimitNearbyMerchants(ctx, userLocation, merchants, filter.Offset, filter.Limit), nil
+	log.Printf("unsorted merchants: %d", len(merchants))
+	return s.sortAndLimitNearbyMerchants(userLocation, merchants, filter.Offset, filter.Limit), nil
 }
 
 func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation model.Location, filter model.MerchantParams, resolution, k int, seenMerchants map[int64]struct{}, cellMap map[int64]model.Cell) ([]model.MerchantItem, error) {
@@ -90,6 +103,9 @@ func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation m
 		}
 	}
 
+	// log.Printf("unseen cells: %v", unseenCells)
+
+	// TODO: implement concurrent query
 	for _, cell := range unseenCells {
 		cellMap[cell.CellID] = cell
 		queryParams := model.ListMerchantWithItemParams{
@@ -115,7 +131,7 @@ func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation m
 
 func (s *Service) findNearbyMerchantsFromDatabase(ctx context.Context, filter model.MerchantParams, seenMerchants map[int64]struct{}) ([]model.MerchantItem, error) {
 	log := logger.GetLoggerFromContext(ctx)
-	log.Printf("Searching merchants from database with filter: %v\n", filter)
+	log.Printf("Searching merchants from database with filter: %+v\n", filter)
 
 	var merchants []model.MerchantItem
 	queryParams := model.ListMerchantWithItemParams{
@@ -137,7 +153,7 @@ func (s *Service) findNearbyMerchantsFromDatabase(ctx context.Context, filter mo
 	return merchants, nil
 }
 
-func (s *Service) sortAndLimitNearbyMerchants(ctx context.Context, userLocation model.Location, merchants []model.MerchantItem, offset, limit int) []model.MerchantItem {
+func (s *Service) sortAndLimitNearbyMerchants(userLocation model.Location, merchants []model.MerchantItem, offset, limit int) []model.MerchantItem {
 	lenMerchants := len(merchants)
 
 	slices.SortFunc(merchants, func(m1, m2 model.MerchantItem) int {
@@ -162,7 +178,7 @@ func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.
 	isStartingPointValid := false
 
 	var locations []model.Location
-	var totalPrice int64 = 0
+	var totalPrice float64 = 0
 	for _, order := range orderEstimation.Orders {
 		isStartingPointValid = isStartingPointValid != order.IsStartingPoint
 
@@ -171,7 +187,7 @@ func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.
 			return model.EstimationPrice{}, err
 		}
 
-		if !s.validateDistance(ctx, orderEstimation.UserLocation, merchant.Location) {
+		if !s.validateDistance(orderEstimation.UserLocation, merchant.Location) {
 			return model.EstimationPrice{}, constants.ErrMerchantTooFar
 		}
 
@@ -181,7 +197,7 @@ func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.
 				return model.EstimationPrice{}, err
 			}
 
-			totalPrice += int64(orderItem.Quantity) * item.Price
+			totalPrice += float64(orderItem.Quantity) * item.Price
 		}
 
 		merchant.Location.IsStartingPoint = order.IsStartingPoint
@@ -205,7 +221,7 @@ func (s *Service) EstimateOrderPrice(ctx context.Context, orderEstimation model.
 	return estimationPrice, nil
 }
 
-func (s *Service) validateDistance(ctx context.Context, user, merchant model.Location) bool {
+func (s *Service) validateDistance(user, merchant model.Location) bool {
 
 	distance := utils.CalculateDistance(user.Lat, user.Long, merchant.Lat, merchant.Long)
 

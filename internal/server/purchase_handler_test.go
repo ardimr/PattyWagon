@@ -2,10 +2,13 @@ package server
 
 import (
 	"PattyWagon/internal/constants"
+	"PattyWagon/internal/database"
 	imagecompressor "PattyWagon/internal/image_compressor"
+	"PattyWagon/internal/location"
 	mocklocationservice "PattyWagon/internal/mock_location_service"
 	"PattyWagon/internal/mock_repository"
 	"PattyWagon/internal/model"
+	"PattyWagon/internal/repository"
 	"PattyWagon/internal/service"
 	"PattyWagon/internal/storage"
 	"PattyWagon/internal/utils"
@@ -23,14 +26,24 @@ import (
 )
 
 func testPurchaseSetup(t *testing.T) *Server {
-	repo := &mock_repository.TestRepositoryMock{}
+	// repo := &mock_repository.TestRepositoryMock{}
+	repo := repository.New(database.New(
+		"localhost",
+		"5432",
+		"patty-wagon-dev",
+		"postgres",
+		"postgres",
+		"public",
+		nil,
+	))
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
 	imageCompressor := imagecompressor.New(5, 50)
-	locationSvc := &mocklocationservice.MockLocationService{}
+	// locationSvc := &mocklocationservice.MockLocationService{}
+	locationSvc := location.NewService()
 	svc := service.New(repo, storage, imageCompressor, locationSvc)
 
-	testPopulateMockRepo(t, repo)
-	testPopulateMockLocationService(t, locationSvc)
+	// testPopulateMockRepo(t, repo)
+	// testPopulateMockLocationService(t, locationSvc)
 	return &Server{
 		port:      8080,
 		service:   svc,
@@ -397,11 +410,64 @@ func TestGetNearbyMerchants(t *testing.T) {
 		err := json.NewDecoder(w.Body).Decode(&response)
 		assert.NoError(t, err)
 
+		for _, data := range response.Data {
+			t.Log(data)
+		}
+
+		t.Logf("%+v", response.Meta)
+
+		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
+		assert.NotEmpty(t, response.Data, "Should return merchants")
+	})
+
+	t.Run("ValidWithFilter_MerchantID", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?merchantId=2", nil)
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 200, resp.StatusCode)
+
+		// Parse response and validate distance ordering
+		var response FindNearbyMerchantsResponse
+		err := json.NewDecoder(w.Body).Decode(&response)
+		assert.NoError(t, err)
+
+		for _, data := range response.Data {
+			t.Log(data)
+		}
+
+		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
+		assert.NotEmpty(t, response.Data, "Should return merchants")
+	})
+
+	t.Run("ValidWithFilter_Name", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?name=bat", nil)
+		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
+		w := httptest.NewRecorder()
+
+		s.FindNearbyMerchants(w, req)
+
+		resp := w.Result()
+		assert.Equal(t, 200, resp.StatusCode)
+
+		// Parse response and validate distance ordering
+		var response FindNearbyMerchantsResponse
+		err := json.NewDecoder(w.Body).Decode(&response)
+		assert.NoError(t, err)
+
+		for _, data := range response.Data {
+			t.Log(data)
+		}
+
 		validateMerchantsOrderedByDistance(t, userLocation.Lat, userLocation.Long, response.Data)
 		assert.NotEmpty(t, response.Data, "Should return merchants")
 	})
 
 	t.Run("ValidWithPagination_DistanceOrdering", func(t *testing.T) {
+		// t.Skip()
 		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?limit=3&offset=1", nil)
 		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
 		w := httptest.NewRecorder()
@@ -421,6 +487,7 @@ func TestGetNearbyMerchants(t *testing.T) {
 	})
 
 	t.Run("EdgeCase_OffsetGreaterThanTotal", func(t *testing.T) {
+		// t.Skip()
 		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?limit=10&offset=100", nil)
 		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
 		w := httptest.NewRecorder()
@@ -440,6 +507,7 @@ func TestGetNearbyMerchants(t *testing.T) {
 	})
 
 	t.Run("EdgeCase_LimitExceedsRemaining", func(t *testing.T) {
+		// t.Skip()
 		req := httptest.NewRequest(http.MethodGet, "/v1/merchants/nearby?limit=100&offset=3", nil)
 		req.SetPathValue("coordinate", fmt.Sprintf("%f,%f", userLocation.Lat, userLocation.Long))
 		w := httptest.NewRecorder()

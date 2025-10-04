@@ -22,6 +22,7 @@ type MerchantParams struct {
 	Offset           int
 	Name             *string
 	MerchantCategory *string
+	SortingOrder     *string
 }
 
 type MerchantLocation struct {

@@ -14,12 +14,12 @@ type Order struct {
 }
 
 type Item struct {
-	ID              int64
-	Name            string
-	Price           int64
-	ProductCategory string
-	ImageUrl        string
-	CreatedAt       time.Time
+	ID              int64     `json:"id"`
+	Name            string    `json:"name"`
+	Price           float64   `json:"price"`
+	ProductCategory string    `json:"category"`
+	ImageUrl        string    `json:"image_url"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type OrderItem struct {
@@ -30,7 +30,7 @@ type OrderItem struct {
 type EstimationPrice struct {
 	ID                         int64
 	EstimatedDeliveryInMinutes int64
-	TotalPrice                 int64
+	TotalPrice                 float64
 }
 
 type FindNerbyMerchantParams struct {

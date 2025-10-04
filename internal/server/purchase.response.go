@@ -6,9 +6,9 @@ import (
 )
 
 type EstimationPriceResponse struct {
-	CalculateEstimateID        string `json:"calculateEstimateId"`
-	TotalPrice                 int64  `json:"totalPrice"`
-	EstimatedDeliveryInMinutes int64  `json:"estimatedDeliveryInMinutes"`
+	CalculateEstimateID        string  `json:"calculateEstimateId"`
+	TotalPrice                 float64 `json:"totalPrice"`
+	EstimatedDeliveryInMinutes int64   `json:"estimatedDeliveryInMinutes"`
 }
 
 func (r *EstimationPriceResponse) FromModel(input model.EstimationPrice) {
@@ -52,8 +52,14 @@ type MerchantWithItem struct {
 	Items    []Item   `json:"item"`
 }
 
+type FindNearbyMerchantsResponseMeta struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
+}
 type FindNearbyMerchantsResponse struct {
-	Data []MerchantWithItem `json:"data"`
+	Data []MerchantWithItem              `json:"data"`
+	Meta FindNearbyMerchantsResponseMeta `json:"meta"`
 }
 
 func NewLocationResponse(input model.Location) LocationResponse {
@@ -99,7 +105,7 @@ func NewMerchantWithItem(input model.MerchantItem) MerchantWithItem {
 	}
 }
 
-func NewFindNearbyMerchantsResponse(inputs []model.MerchantItem) FindNearbyMerchantsResponse {
+func NewFindNearbyMerchantsResponse(inputs []model.MerchantItem, meta FindNearbyMerchantsResponseMeta) FindNearbyMerchantsResponse {
 	var merchantWithItems []MerchantWithItem
 
 	for _, input := range inputs {
@@ -107,6 +113,7 @@ func NewFindNearbyMerchantsResponse(inputs []model.MerchantItem) FindNearbyMerch
 	}
 	return FindNearbyMerchantsResponse{
 		Data: merchantWithItems,
+		Meta: meta,
 	}
 
 }

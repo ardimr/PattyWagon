@@ -35,6 +35,8 @@ type Repository interface {
 	ListMerchantWithItems(ctx context.Context, params model.ListMerchantWithItemParams) ([]model.MerchantItem, error)
 	// Item
 	GetItemByID(ctx context.Context, id int64) (model.Item, error)
+
+	GetMerchantWithItems(ctx context.Context, merchantID int64) (model.MerchantItem, error)
 }
 
 type Storage interface {
