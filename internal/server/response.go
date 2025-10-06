@@ -57,8 +57,8 @@ type GetMerchantResponse struct {
 type DetailMerchant struct {
 	MerchantID string         `json:"merchantId"`
 	Name       string         `json:"name"`
-	Category   string         `json:"category"`
-	ImageURL   string         `json:"image_url"`
+	Category   string         `json:"merchantCategory"`
+	ImageURL   string         `json:"imageUrl"`
 	Location   DetailLocation `json:"location"`
 	CreatedAt  string         `json:"createdAt"`
 }
