@@ -71,8 +71,11 @@ db-migrate-up:
 	@goose up
 
 db-migrate-down:
-	@goose down
+	@goose down-to 0
 
+db-reset:
+	@goose down-to 0 && goose up
+	
 db-generate-sql:
 	@sqlc generate
 
