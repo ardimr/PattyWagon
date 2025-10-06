@@ -37,6 +37,7 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+      - "35432:5432"
     volumes:
       - psql_volume_bp:/var/lib/postgresql/sprint/data
   minio:
