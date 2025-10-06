@@ -3,13 +3,16 @@ package server
 import (
 	"PattyWagon/internal/constants"
 	"PattyWagon/internal/utils"
+	"PattyWagon/logger"
 	"PattyWagon/observability"
 	"net/http"
 )
 
 func (s *Server) FindNearbyMerchants(w http.ResponseWriter, r *http.Request) {
+	log := logger.GetLoggerFromContext(r.Context())
 	ctx, span := observability.Tracer.Start(r.Context(), "handler.get_nearby_merchants")
 	defer span.End()
+	log.Printf("------------finding nearby merchants ----------\n")
 
 	if r.Method != http.MethodGet {
 		sendErrorResponse(w, http.StatusMethodNotAllowed, "Method not allowed")
@@ -33,6 +36,7 @@ func (s *Server) FindNearbyMerchants(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("coordinate: %s | lat: %f lon: %f", coordinate, lat, lng)
 	userLocation := LocationRequest{
 		Lat:  lat,
 		Long: lng,

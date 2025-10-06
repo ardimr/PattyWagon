@@ -22,7 +22,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("GET /admin/merchants/{merchantId}/items", s.getItemHandler)
 
 	// Purchase
-	mux.HandleFunc("GET /v1/merchants/nearby/{coordinate}", s.FindNearbyMerchants)
+	mux.HandleFunc("GET /merchants/nearby/{coordinate}", s.FindNearbyMerchants)
 	// mux.HandleFunc("POST /v1/users/estimate", s.EstimateOrderPrice)
 	return logger.LoggingMiddleware(s.contentMiddleware(s.authMiddleware(mux)))
 }

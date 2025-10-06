@@ -105,6 +105,13 @@ func TestValidateAndExtractCoordinate(t *testing.T) {
 			expectedLng: -181.0,
 			expectError: false, // function doesn't validate ranges
 		},
+		{
+			name:        "string",
+			input:       "a,b",
+			expectedLat: 0,
+			expectedLng: 0,
+			expectError: true,
+		},
 	}
 
 	for _, tt := range tests {

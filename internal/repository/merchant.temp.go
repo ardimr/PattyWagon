@@ -12,13 +12,19 @@ import (
 )
 
 const (
-	baseMerchantQuery = `
+	baseMerchantQueryWithCell = `
 WITH matching_merchants AS (
     -- Base merchants query
     SELECT DISTINCT ml.merchant_id
     FROM merchant_locations ml
     INNER JOIN merchants m ON m.id = ml.merchant_id`
 
+	baseMerchantQueryWithoutCell = `
+WITH matching_merchants AS (
+    -- Base merchants query
+    SELECT DISTINCT m.id as merchant_id
+		FROM merchants as m
+`
 	unionItemQuery = `
     UNION
     -- Merchants matching by item name
@@ -42,7 +48,7 @@ SELECT
     json_build_object(
       'id', i.id,
       'name', i.name,
-      'product_category', i.category,
+      'category', i.category,
       'price', i.price,
       'image_url', i.image_url,
       'created_at', i.created_at AT TIME ZONE 'UTC'
@@ -50,7 +56,7 @@ SELECT
   ) as items
 FROM matching_merchants
 INNER JOIN merchants as m on m.id = matching_merchants.merchant_id
-INNER JOIN items as i on i.merchant_id = matching_merchants.merchant_id
+LEFT JOIN items as i on i.merchant_id = matching_merchants.merchant_id
 GROUP BY m.id`
 )
 
@@ -68,7 +74,7 @@ SELECT
     json_build_object(
       'id', i.id,
       'name', i.name,
-      'product_category', i.category,
+      'category', i.category,
       'price', i.price,
       'image_url', i.image_url,
       'created_at', i.created_at AT TIME ZONE 'UTC'
@@ -91,7 +97,8 @@ func (q *Queries) GetMerchantByCellID(ctx context.Context, cellID int64) (model.
 func (q *Queries) ListMerchantWithItems(ctx context.Context, filter model.ListMerchantWithItemParams) ([]model.MerchantItem, error) {
 	log := logger.GetLoggerFromContext(ctx)
 	// Build the query dynamically
-	query := baseMerchantQuery
+	var query string
+
 	args := []interface{}{}
 	argIdx := 1
 
@@ -99,9 +106,13 @@ func (q *Queries) ListMerchantWithItems(ctx context.Context, filter model.ListMe
 	baseConds := []string{}
 
 	if filter.Cell != nil {
+		query = baseMerchantQueryWithCell
+
 		baseConds = append(baseConds, fmt.Sprintf(" ml.h3_index = $%d", argIdx))
 		args = append(args, filter.Cell.CellID)
 		argIdx++
+	} else {
+		query = baseMerchantQueryWithoutCell
 	}
 
 	if filter.MerchantCategory != nil {

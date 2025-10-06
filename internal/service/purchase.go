@@ -86,8 +86,8 @@ func (s *Service) findNearbyMerchantsWithStrategy(ctx context.Context, userLocat
 }
 
 func (s *Service) findNearbyMerchantsByKRing(ctx context.Context, userLocation model.Location, filter model.MerchantParams, resolution, k int, seenMerchants map[int64]struct{}, cellMap map[int64]model.Cell) ([]model.MerchantItem, error) {
-	log := logger.GetLoggerFromContext(ctx)
-	log.Printf("K-ring: %d ", k)
+	// log := logger.GetLoggerFromContext(ctx)
+	// log.Printf("K-ring: %d ", k)
 
 	var merchants []model.MerchantItem
 	var lock sync.Mutex

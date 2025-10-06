@@ -44,6 +44,7 @@ type Item struct {
 	ItemID          string    `json:"itemId"`
 	Name            string    `json:"name"`
 	ProductCategory string    `json:"productCategory"`
+	Price           float64   `json:"price"`
 	ImageUrl        string    `json:"imageUrl"`
 	CreatedAt       time.Time `json:"createdAt"`
 }
@@ -86,6 +87,7 @@ func NewItemResponse(input model.Item) Item {
 		ItemID:          strconv.Itoa(int(input.ID)),
 		Name:            input.Name,
 		ProductCategory: input.Category,
+		Price:           input.Price,
 		ImageUrl:        input.ImageURL,
 		CreatedAt:       input.CreatedAt,
 	}

@@ -96,6 +96,6 @@ load-test-file:
 	@hey -z 5s -c 100 -m POST -D './internal/server/testdata/image-50KB.jpg' 'http://localhost:8080/v1/file'
 
 clean-run:
-	@goose down-to 0 && goose up && go run cmd/api/main.go
+	@goose down-to 0 && goose up && ENV=TESTINGs go run cmd/api/main.go
 
 .PHONY: all build run test clean watch lint docker-run docker-down itest db-migrate-create db-migrate-up db-migrate-down db-generate-sql

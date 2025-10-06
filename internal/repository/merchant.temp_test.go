@@ -69,7 +69,7 @@ func TestListMerchantWitItems(t *testing.T) {
 		assert.NotEmpty(t, merchantItems)
 
 		for i, merchant := range merchantItems {
-			t.Logf("merchant %d: %v", i, merchant.Merchant.Name)
+			t.Logf("merchant %d: %v", i, merchant.Merchant)
 		}
 	})
 
@@ -81,6 +81,43 @@ func TestListMerchantWitItems(t *testing.T) {
 			},
 			MerchantParams: model.MerchantParams{
 				Name: &filterName,
+			},
+		}
+
+		merchantItems, err := repo.ListMerchantWithItems(context.TODO(), filter)
+		assert.Nil(t, err)
+		assert.NotEmpty(t, merchantItems)
+
+		for i, merchant := range merchantItems {
+			t.Logf("merchant %d: %v", i, merchant)
+		}
+	})
+
+	t.Run("Valid_WithFilterName", func(t *testing.T) {
+		filterName := "tok"
+		filter := model.ListMerchantWithItemParams{
+			Cell: &model.Cell{
+				CellID: 614348827586985983,
+			},
+			MerchantParams: model.MerchantParams{
+				Name: &filterName,
+			},
+		}
+
+		merchantItems, err := repo.ListMerchantWithItems(context.TODO(), filter)
+		assert.Nil(t, err)
+		assert.NotEmpty(t, merchantItems)
+
+		for i, merchant := range merchantItems {
+			t.Logf("merchant %d: %v", i, merchant)
+		}
+	})
+
+	t.Run("Valid_WithFilterMerchantCategory", func(t *testing.T) {
+		filterName := "BoothKiosk"
+		filter := model.ListMerchantWithItemParams{
+			MerchantParams: model.MerchantParams{
+				MerchantCategory: &filterName,
 			},
 		}
 
