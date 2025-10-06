@@ -31,8 +31,8 @@ func (q *Queries) CreateItems(ctx context.Context, item model.Item) (int64, erro
 
 func (q *Queries) GetItems(ctx context.Context, filter model.FilterItem) (res []model.Item, err error) {
 	query := `
-		SELECT id, name, category, image_url, latitude, longitude, created_at
-		FROM merchants
+		SELECT id, merchant_id, name, category, price, image_url, created_at
+		FROM items
 	`
 	conds := []string{}
 	args := []interface{}{}
@@ -92,18 +92,19 @@ func (q *Queries) GetItems(ctx context.Context, filter model.FilterItem) (res []
 
 	var items []model.Item
 	for rows.Next() {
-		var m model.Item
+		var i model.Item
 		if err := rows.Scan(
-			&m.ID,
-			&m.Name,
-			&m.Category,
-			&m.Price,
-			&m.ImageURL,
-			&m.CreatedAt,
+			&i.ID,
+			&i.MerchantID,
+			&i.Name,
+			&i.Category,
+			&i.Price,
+			&i.ImageURL,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
-		items = append(items, m)
+		items = append(items, i)
 	}
 
 	if err := rows.Err(); err != nil {

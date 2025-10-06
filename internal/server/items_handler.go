@@ -3,10 +3,12 @@ package server
 import (
 	"PattyWagon/internal/constants"
 	"PattyWagon/internal/model"
+	"PattyWagon/internal/utils"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -34,10 +36,12 @@ func (s *Server) createItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	merchantIDStr := r.PathValue("merchantID")
+	merchantIDStr := r.PathValue("merchantId")
 	if len(merchantIDStr) == 0 {
-		sendErrorResponse(w, http.StatusBadRequest, "product id cannot be empty")
+		sendErrorResponse(w, http.StatusBadRequest, "merchant id cannot be empty")
+		return
 	}
+
 	merchantID, err := strconv.ParseInt(merchantIDStr, 10, 64)
 	if err != nil || merchantID <= 0 {
 		sendErrorResponse(w, http.StatusNotFound, "merchant not found")
@@ -49,9 +53,29 @@ func (s *Server) createItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Name == "" {
+		sendErrorResponse(w, http.StatusBadRequest, "item name cannot be empty")
+		return
+	}
+
+	if len(req.Name) < 2 || len(req.Name) > 30 {
+		sendErrorResponse(w, http.StatusBadRequest, "invalid item name")
+		return
+	}
+
 	if req.ImageURL == "" || !(strings.HasPrefix(req.ImageURL, "http://") ||
 		strings.HasPrefix(req.ImageURL, "https://")) {
 		sendErrorResponse(w, http.StatusBadRequest, "invalid imageUrl")
+		return
+	}
+
+	if err := utils.ValidateFileExtensions(filepath.Base(req.ImageURL), constants.AllowedExtensions); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if req.Price == 0 {
+		sendErrorResponse(w, http.StatusBadRequest, "invalid price: price cannot be null")
 		return
 	}
 
