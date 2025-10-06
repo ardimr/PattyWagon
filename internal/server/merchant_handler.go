@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -50,6 +51,11 @@ func (s *Server) createMerchantHandler(w http.ResponseWriter, r *http.Request) {
 		ImageURL:  req.ImageURL,
 		Latitude:  req.Location.Latitude,
 		Longitude: req.Location.Longitude,
+	}
+
+	if err := utils.ValidateFileExtensions(filepath.Base(paramsCreateMerchant.ImageURL), constants.AllowedExtensions); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	res, err := s.service.CreateMerchant(ctx, paramsCreateMerchant)
