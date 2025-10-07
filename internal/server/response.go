@@ -44,3 +44,45 @@ type FileUploadResponse struct {
 	FileUri          string `json:"fileUri"`
 	FileThumbnailUri string `json:"fileThumbnailUri"`
 }
+
+type CreateMerchantResponse struct {
+	MerchantID string `json:"merchantId"`
+}
+
+type GetMerchantResponse struct {
+	Data []DetailMerchant `json:"data"`
+	Meta Meta             `json:"meta"`
+}
+
+type DetailMerchant struct {
+	MerchantID string         `json:"merchantId"`
+	Name       string         `json:"name"`
+	Category   string         `json:"merchantCategory"`
+	ImageURL   string         `json:"imageUrl"`
+	Location   DetailLocation `json:"location"`
+	CreatedAt  string         `json:"createdAt"`
+}
+
+type Meta struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
+}
+
+type CreateItemResponse struct {
+	ItemID string `json:"itemId"`
+}
+
+type GetItemsResponse struct {
+	Data []DetailItem `json:"data"`
+	Meta Meta         `json:"meta"`
+}
+
+type DetailItem struct {
+	ItemID          string  `json:"itemId"`
+	Name            string  `json:"name"`
+	ProductCategory string  `json:"productCategory"`
+	Price           float64 `json:"price"`
+	ImageURL        string  `json:"imageUrl"`
+	CreatedAt       string  `json:"createdAt"`
+}
