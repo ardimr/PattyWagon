@@ -120,9 +120,9 @@ func (q *Queries) GetMerchants(ctx context.Context, filter model.FilterMerchant)
 	return
 }
 
-func (r *Queries) MerchantExists(ctx context.Context, merchantID int64) (res bool, err error) {
+func (q *Queries) MerchantExists(ctx context.Context, merchantID int64) (res bool, err error) {
 	var exists bool
-	err = r.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM merchants WHERE id=$1)", merchantID).Scan(&exists)
+	err = q.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM merchants WHERE id=$1)", merchantID).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
@@ -157,4 +157,14 @@ func (q *Queries) BulkInsertMerchantLocations(ctx context.Context, locations []m
 	}
 
 	return nil
+}
+
+func (q *Queries) GetMerchantCount(ctx context.Context) (int64, error) {
+	var count int64
+	query := `SELECT COUNT(*) FROM merchants`
+	err := q.db.QueryRowContext(ctx, query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
