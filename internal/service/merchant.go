@@ -22,6 +22,8 @@ func (s *Service) CreateMerchant(ctx context.Context, req model.Merchant) (res i
 		return 0, err
 	}
 
+	s.merchantCounter.Increment()
+
 	merchantCells, err := s.locationService.GetAllCellIDs(ctx, model.Location{
 		Lat:  req.Latitude,
 		Long: req.Longitude,
