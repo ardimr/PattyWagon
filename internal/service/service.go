@@ -35,6 +35,14 @@ type Repository interface {
 
 	CreateItems(ctx context.Context, item model.Item) (int64, error)
 	GetItems(ctx context.Context, filter model.FilterItem) (res []model.Item, err error)
+	// Merchant Repository
+	GetMerchantByID(ctx context.Context, id int64) (model.Merchant, error)
+	GetMerchantByCellID(ctx context.Context, cellID int64) (model.Merchant, error)
+	ListMerchantWithItems(ctx context.Context, params model.ListMerchantWithItemParams) ([]model.MerchantItem, error)
+	// Item
+	GetItemByID(ctx context.Context, id int64) (model.Item, error)
+
+	GetMerchantWithItems(ctx context.Context, merchantID int64) (model.MerchantItem, error)
 }
 
 type Storage interface {
@@ -51,11 +59,11 @@ type LocationService interface {
 	FindKRingCellIDs(ctx context.Context, location model.Location, resolution, k int) ([]model.Cell, error)
 }
 
-func New(repository Repository, storage Storage, imageCompressor ImageCompressor, LocationService LocationService) *Service {
+func New(repository Repository, storage Storage, imageCompressor ImageCompressor, locationService LocationService) *Service {
 	return &Service{
 		repository:      repository,
 		storage:         storage,
 		imageCompressor: imageCompressor,
-		locationService: LocationService,
+		locationService: locationService,
 	}
 }

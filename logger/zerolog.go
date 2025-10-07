@@ -13,6 +13,9 @@ import (
 func Init() {
 	if os.Getenv("ENV") == "PRODUCTION" {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	} else if os.Getenv("ENV") == "TESTING" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)

@@ -1,13 +1,11 @@
 package server
 
 import (
-	"PattyWagon/internal/utils"
-	"log"
 	"net/http"
 )
 
 func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(utils.GetUserIDFromCtx(r.Context()))
+	// log.Println(utils.GetUserIDFromCtx(r.Context()))
 	sendResponse(w, http.StatusOK, "Hello World!")
 }
 

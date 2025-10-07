@@ -6,8 +6,8 @@ CREATE TABLE merchants (
   name VARCHAR(255) NOT NULL,
   category VARCHAR(255),
   image_url VARCHAR(255) NOT NULL,
-  latitude NUMERIC(12,2) NOT NULL,
-  longitude NUMERIC(12,2) NOT NULL,
+  latitude NUMERIC(12,6) NOT NULL,
+  longitude NUMERIC(12,6) NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
   CONSTRAINT fk_user

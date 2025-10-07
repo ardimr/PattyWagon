@@ -18,7 +18,7 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	}
 
 	userPaths := map[string]bool{
-		"/merchants/nearby/{lat}/{long}": true, //user dynamic lat long
+		"/merchants/nearby/{coordinate}": true, //user dynamic lat long
 		"/users/estimate":                true,
 		"/users/orders":                  true,
 	}
