@@ -10,9 +10,19 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	mux.HandleFunc("/", s.HelloWorldHandler)
 	mux.HandleFunc("/health", s.healthHandler)
-	mux.HandleFunc("POST /v1/register/email", s.emailRegisterHandler)
-	mux.HandleFunc("POST /v1/login/email", s.emailLoginHandler)
-	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
+	mux.HandleFunc("POST /admin/register", s.adminRegisterHandler)
+	mux.HandleFunc("POST /admin/login", s.adminLoginHandler)
+	mux.HandleFunc("POST /users/register", s.userRegisterHandler)
+	mux.HandleFunc("POST /users/login", s.userLoginHandler)
 
+	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
+	mux.HandleFunc("POST /admin/merchants", s.createMerchantHandler)
+	mux.HandleFunc("GET /admin/merchants", s.getMerchantHandler)
+	mux.HandleFunc("POST /admin/merchants/{merchantId}/items", s.createItemHandler)
+	mux.HandleFunc("GET /admin/merchants/{merchantId}/items", s.getItemHandler)
+
+	// Purchase
+	mux.HandleFunc("GET /merchants/nearby/{coordinate}", s.FindNearbyMerchants)
+	// mux.HandleFunc("POST /v1/users/estimate", s.EstimateOrderPrice)
 	return logger.LoggingMiddleware(s.contentMiddleware(s.authMiddleware(mux)))
 }

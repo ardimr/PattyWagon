@@ -10,6 +10,8 @@ type Service struct {
 	repository      Repository
 	storage         Storage
 	imageCompressor ImageCompressor
+	locationService LocationService
+	merchantCounter MerchantCounter
 }
 
 type Repository interface {
@@ -18,8 +20,7 @@ type Repository interface {
 
 	// User Repository
 	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
-	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
-	IsUserExist(ctx context.Context, userID int64) (bool, error)
+	SelectUserCredentialsByUsernameAndRole(ctx context.Context, username string, role int16) (res model.User, err error)
 
 	// File Repository
 	GetFileUpload(ctx context.Context, id int64) (model.File, error)
@@ -27,6 +28,20 @@ type Repository interface {
 	GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error)
 	FileExists(ctx context.Context, fileID string) (bool, error)
 
+	// Merchant Repository
+	InsertMerchant(ctx context.Context, data model.Merchant) (res int64, err error)
+	GetMerchants(ctx context.Context, filter model.FilterMerchant) (res []model.Merchant, err error)
+	MerchantExists(ctx context.Context, merchantID int64) (res bool, err error)
+	BulkInsertMerchantLocations(ctx context.Context, locations []model.MerchantLocation) error
+
+	CreateItems(ctx context.Context, item model.Item) (int64, error)
+	GetItems(ctx context.Context, filter model.FilterItem) (res []model.Item, err error)
+	// Merchant Repository
+	GetMerchantByCellID(ctx context.Context, cellID int64) (model.Merchant, error)
+	ListMerchantWithItems(ctx context.Context, params model.ListMerchantWithItemParams) ([]model.MerchantItem, error)
+	// Item
+
+	GetMerchantWithItems(ctx context.Context, merchantID int64) (model.MerchantItem, error)
 	// Merchant Repository
 	GetMerchantByID(ctx context.Context, id int64) (model.Merchant, error)
 
@@ -61,10 +76,23 @@ type ImageCompressor interface {
 	Compress(ctx context.Context, src string) (string, error)
 }
 
-func New(repository Repository, storage Storage, imageCompressor ImageCompressor) *Service {
+type LocationService interface {
+	GetAllCellIDs(ctx context.Context, location model.Location) ([]model.Cell, error)
+	FindCellIDByResolution(ctx context.Context, location model.Location, resolution int) (model.Cell, error)
+	FindKRingCellIDs(ctx context.Context, location model.Location, resolution, k int) ([]model.Cell, error)
+}
+
+type MerchantCounter interface {
+	Increment()
+	Get() int64
+}
+
+func New(repository Repository, storage Storage, imageCompressor ImageCompressor, locationService LocationService, merchantCounter MerchantCounter) *Service {
 	return &Service{
 		repository:      repository,
 		storage:         storage,
 		imageCompressor: imageCompressor,
+		locationService: locationService,
+		merchantCounter: merchantCounter,
 	}
 }

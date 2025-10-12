@@ -11,18 +11,28 @@ import (
 	"strconv"
 	"time"
 
+	constants "PattyWagon/internal/constants"
+
 	"github.com/go-playground/validator/v10"
 
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type Service interface {
-	EmailLogin(ctx context.Context, user string, password string) (string, string, error)
-	Register(ctx context.Context, user model.User, password string) (string, error)
-
-	IsUserExist(ctx context.Context, userID int64) (bool, error)
+	UsernameLogin(ctx context.Context, username string, password string, role int16) (token string, err error)
+	Register(ctx context.Context, userReq model.User, password string, role int16) (string, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
+
+	CreateMerchant(ctx context.Context, req model.Merchant) (res int64, err error)
+	GetMerchants(ctx context.Context, req model.FilterMerchant) (res []model.Merchant, err error)
+
+	CreateItems(ctx context.Context, req model.Item) (res int64, err error)
+	GetItems(ctx context.Context, req model.FilterItem) (res []model.Item, err error)
+
+	// Purchase
+	// EstimateOrderPrice(ctx context.Context, req model.OrderEstimation) (model.EstimationPrice, error)
+	FindNearbyMerchants(ctx context.Context, userLocation model.Location, searchParams model.FindNerbyMerchantParams) ([]model.MerchantItem, error)
 
 	GetOrder(ctx context.Context, orderID int64) (model.Order, error)
 	GetOrderDetail(ctx context.Context, orderDetailID int64) (model.OrderDetail, error)
@@ -56,16 +66,14 @@ func NewServer(service Service) *http.Server {
 		validator: v,
 	}
 
-	// Custom validator for product type
-	// NewServer.validator.RegisterValidation("productType", func(fl validator.FieldLevel) bool {
-	// 	productType := fl.Field().String()
-	// 	for _, pt := range constants.ProductTypes {
-	// 		if strings.EqualFold(pt, productType) {
-	// 			return true
-	// 		}
-	// 	}
-	// 	return false
-	// })
+	// Custom validator for merchant category
+	NewServer.validator.RegisterValidation("merchantCategory", func(fl validator.FieldLevel) bool {
+		return constants.IsValidMerchantCategory(fl.Field().String())
+	})
+	// Custom validator for product category
+	NewServer.validator.RegisterValidation("productCategory", func(fl validator.FieldLevel) bool {
+		return constants.IsValidProductCategory(fl.Field().String())
+	})
 
 	// Declare Server config
 	server := &http.Server{

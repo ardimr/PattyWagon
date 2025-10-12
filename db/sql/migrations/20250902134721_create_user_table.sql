@@ -5,7 +5,7 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash TEXT NOT NULL, 
-    role VARCHAR(255) NOT NULL,
+    role SMALLINT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
