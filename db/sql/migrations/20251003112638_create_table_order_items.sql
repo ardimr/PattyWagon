@@ -21,5 +21,8 @@ CREATE INDEX idx_order_items_item_id ON order_items(item_id);
 
 -- +goose Down
 -- +goose StatementBegin
+DROP INDEX IF EXISTS idx_order_items_item_id;
+DROP INDEX IF EXISTS idx_order_items_order_detail_id;
+DROP TABLE IF EXISTS order_items;
 SELECT 'down SQL query';
 -- +goose StatementEnd

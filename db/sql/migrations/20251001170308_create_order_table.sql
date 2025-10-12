@@ -15,7 +15,7 @@ CREATE INDEX idx_orders_created_at ON orders(created_at);
 
 -- +goose Down
 -- +goose StatementBegin
-DROP INDEX IF EXISTS idx_orders_user_purchased;
 DROP INDEX IF EXISTS idx_orders_created_at;
+DROP INDEX IF EXISTS idx_orders_user_purchased;
 DROP TABLE IF EXISTS orders;
 -- +goose StatementEnd

@@ -20,5 +20,7 @@ CREATE INDEX idx_order_details_merchant_id ON order_details(merchant_id);
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP INDEX IF EXISTS idx_order_details_merchant_id;
+DROP INDEX IF EXISTS idx_order_details_order_id;
+DROP TABLE IF EXISTS order_details;
 -- +goose StatementEnd
