@@ -63,9 +63,9 @@ type Repository interface {
 	GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx context.Context, tx *sql.Tx, orderID, merchantID int64) (model.OrderDetail, error)
 
 	// Order Item Repository
-	CreateOrderItemWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error)
+	CreateOrderItemWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem float64, quantity int32, totalPrice float64) (model.OrderItem, error)
 	GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64) (model.OrderItem, error)
-	UpdateOrderItemWithTx(ctx context.Context, tx *sql.Tx, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error)
+	UpdateOrderItemWithTx(ctx context.Context, tx *sql.Tx, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem float64, quantity int32, totalPrice float64) (model.OrderItem, error)
 }
 
 type Storage interface {

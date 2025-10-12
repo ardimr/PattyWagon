@@ -35,7 +35,6 @@ var (
 	ErrOrderItemNotFound   = errors.New("order item not found")
 	ErrNoUnpurchasedOrder  = errors.New("no unpurchased order found")
 	ErrMerchantNotFound    = errors.New("merchant not found")
-	ErrItemNotFound        = errors.New("item not found")
 	ErrTransactionFailed   = errors.New("transaction failed")
 
 	// Service operation errors

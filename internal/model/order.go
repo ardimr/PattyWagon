@@ -34,9 +34,9 @@ type OrderItem struct {
 	ItemName        string    `json:"item_name" db:"item_name"`
 	ProductCategory string    `json:"product_category" db:"product_category"`
 	ItemImageURL    string    `json:"item_image_url" db:"item_image_url"`
-	PricePerItem    int64     `json:"price_per_item" db:"price_per_item"`
+	PricePerItem    float64   `json:"price_per_item" db:"price_per_item"`
 	Quantity        int32     `json:"quantity" db:"quantity"`
-	TotalPrice      int64     `json:"total_price" db:"total_price"`
+	TotalPrice      float64   `json:"total_price" db:"total_price"`
 	CreatedAt       time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
 }

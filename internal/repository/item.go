@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	selectItemByIdQuery = `SELECT id, merchant_id, name, category, price, file_uri, created_at, updated_at FROM items WHERE id = $1`
+	selectItemByIdQuery = `SELECT id, merchant_id, name, category, price, image_url, created_at, updated_at FROM items WHERE id = $1`
 )
 
 func (q *Queries) GetItemByID(ctx context.Context, id int64) (model.Item, error) {
@@ -22,7 +22,7 @@ func (q *Queries) GetItemByID(ctx context.Context, id int64) (model.Item, error)
 		&i.Name,
 		&i.Category,
 		&i.Price,
-		&i.FileURI,
+		&i.ImageURL,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	); err != nil {

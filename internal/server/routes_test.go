@@ -3,6 +3,8 @@ package server
 import (
 	"PattyWagon/internal/database"
 	imagecompressor "PattyWagon/internal/image_compressor"
+	"PattyWagon/internal/location"
+	"PattyWagon/internal/merchant_counter"
 	"PattyWagon/internal/repository"
 	"PattyWagon/internal/service"
 	"PattyWagon/internal/storage"
@@ -48,7 +50,9 @@ func testSetup(t *testing.T) *Server {
 	repo := repository.New(db)
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
 	imageCompressor := imagecompressor.New(5, 50)
-	svc := service.New(repo, storage, imageCompressor, nil)
+	merchantCounter := merchant_counter.New(repo)
+	locationSvc := location.NewService()
+	svc := service.New(repo, storage, imageCompressor, locationSvc, merchantCounter)
 	return &Server{
 		port:      8080,
 		service:   svc,

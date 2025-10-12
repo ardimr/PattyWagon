@@ -61,7 +61,7 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 	orderDetail, err := s.repository.GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx, tx, order.ID, merchantID)
 	if err != nil {
 		if errors.Is(err, constants.ErrOrderDetailNotFound) {
-			orderDetail, err = s.repository.CreateOrderDetailWithTx(ctx, tx, order.ID, merchantID, merchant.Name, merchant.Category.String, merchant.ImageURL, merchant.Latitude, merchant.Longitude)
+			orderDetail, err = s.repository.CreateOrderDetailWithTx(ctx, tx, order.ID, merchantID, merchant.Name, merchant.Category, merchant.ImageURL, merchant.Latitude, merchant.Longitude)
 			if err != nil {
 				return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToCreateOrderDetail, err)
 			}
@@ -73,12 +73,12 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 	orderItem, err := s.repository.GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx, tx, orderDetail.ID, itemID)
 	if err != nil {
 		if errors.Is(err, constants.ErrOrderItemNotFound) {
-			pricePerItem := int64(0)
-			if item.Price.Valid {
-				pricePerItem = item.Price.Int64
-			}
+			pricePerItem := item.Price
+			// if item.Price.Valid {
+			// 	pricePerItem = item.Price.Int64
+			// }
 
-			_, err = s.repository.CreateOrderItemWithTx(ctx, tx, orderDetail.ID, itemID, item.Name, item.Category.String, item.FileURI.String, pricePerItem, quantity, pricePerItem*int64(quantity))
+			_, err = s.repository.CreateOrderItemWithTx(ctx, tx, orderDetail.ID, itemID, item.Name, item.Category, item.ImageURL, pricePerItem, quantity, pricePerItem*float64(quantity))
 			if err != nil {
 				return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToCreateOrderItem, err)
 			}
@@ -87,7 +87,7 @@ func (s *Service) AddItemToCart(ctx context.Context, userID, merchantID, itemID 
 		}
 	} else {
 		newQuantity := orderItem.Quantity + quantity
-		newTotalPrice := orderItem.PricePerItem * int64(newQuantity)
+		newTotalPrice := orderItem.PricePerItem * float64(newQuantity)
 		_, err = s.repository.UpdateOrderItemWithTx(ctx, tx, orderItem.ID, orderItem.OrderDetailID, orderItem.ItemName, orderItem.ProductCategory, orderItem.ItemImageURL, orderItem.PricePerItem, newQuantity, newTotalPrice)
 		if err != nil {
 			return model.OrderDetail{}, constants.WrapError(constants.ErrFailedToUpdateOrderItem, err)

@@ -230,7 +230,7 @@ func (q *Queries) GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx context.Context
 }
 
 // Order Item methods
-func (q *Queries) CreateOrderItemWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+func (q *Queries) CreateOrderItemWithTx(ctx context.Context, tx *sql.Tx, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem float64, quantity int32, totalPrice float64) (model.OrderItem, error) {
 	db := q.getDB(tx)
 	query := insertOrderItemQuery
 	var orderItem model.OrderItem
@@ -279,7 +279,7 @@ func (q *Queries) GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx context.Context
 	return orderItem, nil
 }
 
-func (q *Queries) UpdateOrderItemWithTx(ctx context.Context, tx *sql.Tx, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+func (q *Queries) UpdateOrderItemWithTx(ctx context.Context, tx *sql.Tx, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem float64, quantity int32, totalPrice float64) (model.OrderItem, error) {
 	db := q.getDB(tx)
 	query := updateOrderItemQuery
 	var updatedAt sql.NullTime
@@ -331,7 +331,7 @@ func (q *Queries) GetOrderDetailByOrderIDAndMerchantID(ctx context.Context, orde
 	return q.GetOrderDetailByOrderIDAndMerchantIDWithTx(ctx, nil, orderID, merchantID)
 }
 
-func (q *Queries) CreateOrderItem(ctx context.Context, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+func (q *Queries) CreateOrderItem(ctx context.Context, orderDetailID, itemID int64, itemName, productCategory, itemImageURL string, pricePerItem float64, quantity int32, totalPrice float64) (model.OrderItem, error) {
 	return q.CreateOrderItemWithTx(ctx, nil, orderDetailID, itemID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice)
 }
 
@@ -339,6 +339,6 @@ func (q *Queries) GetOrderItemByOrderDetailIDAndItemID(ctx context.Context, orde
 	return q.GetOrderItemByOrderDetailIDAndItemIDWithTx(ctx, nil, orderDetailID, itemID)
 }
 
-func (q *Queries) UpdateOrderItem(ctx context.Context, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem int64, quantity int32, totalPrice int64) (model.OrderItem, error) {
+func (q *Queries) UpdateOrderItem(ctx context.Context, id, orderDetailID int64, itemName, productCategory, itemImageURL string, pricePerItem float64, quantity int32, totalPrice float64) (model.OrderItem, error) {
 	return q.UpdateOrderItemWithTx(ctx, nil, id, orderDetailID, itemName, productCategory, itemImageURL, pricePerItem, quantity, totalPrice)
 }

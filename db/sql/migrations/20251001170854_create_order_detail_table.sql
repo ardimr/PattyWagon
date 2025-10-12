@@ -7,8 +7,8 @@ CREATE TABLE order_details (
     merchant_name VARCHAR(255),
     merchant_category VARCHAR(255),
     merchant_image_url VARCHAR(255),
-    merchant_latitude DECIMAL(12, 2),
-    merchant_longitude DECIMAL(12, 2),
+    merchant_latitude DECIMAL(12, 6),
+    merchant_longitude DECIMAL(12, 6),
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(order_id, merchant_id)

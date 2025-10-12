@@ -14,4 +14,14 @@ type MerchantParams struct {
 	SortingOrder     *string
 }
 
+type MerchantItem struct {
+	Merchant Merchant
+	Items    []Item
+}
+
 type MerchantCategory string
+
+type FindNerbyMerchantParams struct {
+	UserLocation Location
+	MerchantParams
+}

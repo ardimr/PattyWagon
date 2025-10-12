@@ -12,19 +12,19 @@ type EstimationPriceResponse struct {
 	EstimatedDeliveryInMinutes int64   `json:"estimatedDeliveryInMinutes"`
 }
 
-func (r *EstimationPriceResponse) FromModel(input model.EstimationPrice) {
-	r.CalculateEstimateID = strconv.Itoa(int(input.ID))
-	r.EstimatedDeliveryInMinutes = input.EstimatedDeliveryInMinutes
-	r.TotalPrice = input.TotalPrice
-}
+// func (r *EstimationPriceResponse) FromModel(input model.EstimationPrice) {
+// 	r.CalculateEstimateID = strconv.Itoa(int(input.ID))
+// 	r.EstimatedDeliveryInMinutes = input.EstimatedDeliveryInMinutes
+// 	r.TotalPrice = input.TotalPrice
+// }
 
-func NewEstimationPriceResponse(input model.EstimationPrice) EstimationPriceResponse {
-	return EstimationPriceResponse{
-		CalculateEstimateID:        strconv.Itoa(int(input.ID)),
-		TotalPrice:                 input.TotalPrice,
-		EstimatedDeliveryInMinutes: input.EstimatedDeliveryInMinutes,
-	}
-}
+// func NewEstimationPriceResponse(input model.EstimationPrice) EstimationPriceResponse {
+// 	return EstimationPriceResponse{
+// 		CalculateEstimateID:        strconv.Itoa(int(input.ID)),
+// 		TotalPrice:                 input.TotalPrice,
+// 		EstimatedDeliveryInMinutes: input.EstimatedDeliveryInMinutes,
+// 	}
+// }
 
 type LocationResponse struct {
 	Lat  float64 `json:"lat"`
@@ -76,7 +76,7 @@ func NewMerchantResponse(input model.Merchant) Merchant {
 		MerchantID:       strconv.Itoa(int(input.ID)),
 		Location:         NewLocationResponse(input.Latitude, input.Longitude),
 		Name:             input.Name,
-		MerchantCategory: *input.Category,
+		MerchantCategory: input.Category,
 		ImageUrl:         input.ImageURL,
 		CreatedAt:        input.CreatedAt,
 	}

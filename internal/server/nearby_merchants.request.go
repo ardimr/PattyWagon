@@ -23,7 +23,7 @@ type OrderRequest struct {
 
 type OrderItemRequest struct {
 	ItemID   string `json:"itemId" validate:"required"`
-	Quantity int    `json:"quantity" validate:"required,gt=0"`
+	Quantity int32  `json:"quantity" validate:"required,gt=0"`
 }
 
 type FindNearbyMerchantRequest struct {
@@ -50,18 +50,14 @@ func (r *LocationRequest) ToModel() model.Location {
 }
 
 func (r *OrderRequest) ToModel() model.Order {
-	merchantId := utils.String2Int64(r.MerchantID, 0)
+	// merchantId := utils.String2Int64(r.MerchantID, 0)
 
 	var orderItems []model.OrderItem
 	for _, item := range r.Items {
 		orderItems = append(orderItems, item.ToModel())
 	}
 
-	return model.Order{
-		MerchantID:      merchantId,
-		IsStartingPoint: r.IsStartingPoint,
-		Items:           orderItems,
-	}
+	return model.Order{}
 }
 
 func (r *OrderEstimationRequest) ToModel() model.OrderEstimation {
@@ -72,8 +68,8 @@ func (r *OrderEstimationRequest) ToModel() model.OrderEstimation {
 		orders = append(orders, order.ToModel())
 	}
 
-	res.UserLocation = r.UserLocation.ToModel()
-	res.Orders = orders
+	// res.UserLocation = r.UserLocation.ToModel()
+	// res.Orders = orders
 	return res
 }
 

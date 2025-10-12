@@ -5,6 +5,7 @@ import (
 	"PattyWagon/internal/database"
 	imagecompressor "PattyWagon/internal/image_compressor"
 	"PattyWagon/internal/location"
+	"PattyWagon/internal/merchant_counter"
 	mocklocationservice "PattyWagon/internal/mock_location_service"
 	"PattyWagon/internal/mock_repository"
 	"PattyWagon/internal/model"
@@ -47,8 +48,9 @@ func testPurchaseSetup(t *testing.T) *Server {
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
 	imageCompressor := imagecompressor.New(5, 50)
 	// locationSvc := &mocklocationservice.MockLocationService{}
+	merchantCounter := merchant_counter.New(repo)
 	locationSvc := location.NewService()
-	svc := service.New(repo, storage, imageCompressor, locationSvc)
+	svc := service.New(repo, storage, imageCompressor, locationSvc, merchantCounter)
 
 	// testPopulateMockRepo(t, repo)
 	// testPopulateMockLocationService(t, locationSvc)
@@ -66,7 +68,7 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 		Latitude:  6.1753,
 		Longitude: 106.8271,
 		Name:      "Store A",
-		Category:  stringPtr("TODO"),
+		Category:  "TODO",
 		ImageURL:  "http://minio",
 		ID:        1,
 		CreatedAt: time.Now(),
@@ -76,7 +78,7 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 		Latitude:  35.6764,
 		Longitude: 139.6500,
 		Name:      "Store A",
-		Category:  stringPtr("TODO"),
+		Category:  "TODO",
 		ImageURL:  "http://minio",
 		ID:        1,
 		CreatedAt: time.Now(),
@@ -89,21 +91,21 @@ func testPopulateMockRepo(t *testing.T, repo *mock_repository.TestRepositoryMock
 
 	// Generate merchants with different locations and IDs
 	merchants := []model.Merchant{
-		{ID: 1, Name: "Warung Sate Pak Budi", Latitude: 6.1753, Longitude: 106.8271, Category: stringPtr("Street Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 2, Name: "Bakso Malang Enak", Latitude: 6.1760, Longitude: 106.8280, Category: stringPtr("Restaurant"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 3, Name: "Nasi Gudeg Bu Sri", Latitude: 6.1745, Longitude: 106.8265, Category: stringPtr("Traditional Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 4, Name: "Cafe Kopi Hitam", Latitude: 6.1770, Longitude: 106.8290, Category: stringPtr("Cafe"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 5, Name: "Mie Ayam Pak Tarno", Latitude: 6.1740, Longitude: 106.8260, Category: stringPtr("Street Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 6, Name: "Seafood Bu Inem", Latitude: 6.1780, Longitude: 106.8300, Category: stringPtr("Seafood"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 7, Name: "Pizza Corner", Latitude: 6.1765, Longitude: 106.8275, Category: stringPtr("Fast Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 8, Name: "Sushi Zen", Latitude: 6.1755, Longitude: 106.8285, Category: stringPtr("Japanese"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 9, Name: "Burger Joint", Latitude: 6.1750, Longitude: 106.8270, Category: stringPtr("Fast Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 10, Name: "Taco Fiesta", Latitude: 6.1775, Longitude: 106.8295, Category: stringPtr("Mexican"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 11, Name: "Dim Sum Palace", Latitude: 6.1748, Longitude: 106.8268, Category: stringPtr("Chinese"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 12, Name: "Pasta Italia", Latitude: 6.1772, Longitude: 106.8292, Category: stringPtr("Italian"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 13, Name: "Roti Bakar 88", Latitude: 6.1742, Longitude: 106.8262, Category: stringPtr("Bakery"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 14, Name: "Ayam Geprek Bensu", Latitude: 6.1778, Longitude: 106.8298, Category: stringPtr("Indonesian"), ImageURL: "http://minio", CreatedAt: time.Now()},
-		{ID: 15, Name: "Smoothie Bar", Latitude: 6.1758, Longitude: 106.8278, Category: stringPtr("Beverages"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 1, Name: "Warung Sate Pak Budi", Latitude: 6.1753, Longitude: 106.8271, Category: ("Street Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 2, Name: "Bakso Malang Enak", Latitude: 6.1760, Longitude: 106.8280, Category: ("Restaurant"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 3, Name: "Nasi Gudeg Bu Sri", Latitude: 6.1745, Longitude: 106.8265, Category: ("Traditional Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 4, Name: "Cafe Kopi Hitam", Latitude: 6.1770, Longitude: 106.8290, Category: ("Cafe"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 5, Name: "Mie Ayam Pak Tarno", Latitude: 6.1740, Longitude: 106.8260, Category: ("Street Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 6, Name: "Seafood Bu Inem", Latitude: 6.1780, Longitude: 106.8300, Category: ("Seafood"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 7, Name: "Pizza Corner", Latitude: 6.1765, Longitude: 106.8275, Category: ("Fast Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 8, Name: "Sushi Zen", Latitude: 6.1755, Longitude: 106.8285, Category: ("Japanese"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 9, Name: "Burger Joint", Latitude: 6.1750, Longitude: 106.8270, Category: ("Fast Food"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 10, Name: "Taco Fiesta", Latitude: 6.1775, Longitude: 106.8295, Category: ("Mexican"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 11, Name: "Dim Sum Palace", Latitude: 6.1748, Longitude: 106.8268, Category: ("Chinese"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 12, Name: "Pasta Italia", Latitude: 6.1772, Longitude: 106.8292, Category: ("Italian"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 13, Name: "Roti Bakar 88", Latitude: 6.1742, Longitude: 106.8262, Category: ("Bakery"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 14, Name: "Ayam Geprek Bensu", Latitude: 6.1778, Longitude: 106.8298, Category: ("Indonesian"), ImageURL: "http://minio", CreatedAt: time.Now()},
+		{ID: 15, Name: "Smoothie Bar", Latitude: 6.1758, Longitude: 106.8278, Category: ("Beverages"), ImageURL: "http://minio", CreatedAt: time.Now()},
 	}
 
 	// Generate items for each merchant

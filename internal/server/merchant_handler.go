@@ -47,7 +47,7 @@ func (s *Server) createMerchantHandler(w http.ResponseWriter, r *http.Request) {
 	paramsCreateMerchant := model.Merchant{
 		UserID:    userID,
 		Name:      req.Name,
-		Category:  utils.ToPointer(req.Category),
+		Category:  req.Category,
 		ImageURL:  req.ImageURL,
 		Latitude:  req.Location.Latitude,
 		Longitude: req.Location.Longitude,
@@ -137,7 +137,7 @@ func (s *Server) getMerchantHandler(w http.ResponseWriter, r *http.Request) {
 			detailMerchants = append(detailMerchants, DetailMerchant{
 				MerchantID: strconv.Itoa(int(merchant.ID)),
 				Name:       merchant.Name,
-				Category:   utils.PointerValue(merchant.Category, ""),
+				Category:   merchant.Category,
 				ImageURL:   merchant.ImageURL,
 				Location: DetailLocation{
 					Latitude:  merchant.Latitude,
